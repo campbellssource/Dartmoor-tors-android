@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Base.Theme.DartmoorTors" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/dartmoor_green</item>
+        <item name="colorPrimaryVariant">@color/dartmoor_green_dark</item>
+        <item name="colorSecondary">@color/teal_200</item>
+    </style>
+
+    <style name="Theme.DartmoorTors" parent="Base.Theme.DartmoorTors">
+        <item name="android:windowActionBar">true</item>
+        <item name="android:windowNoTitle">false</item>
+        <item name="windowActionBar">true</item>
+        <item name="windowNoTitle">false</item>
+    </style>
+</resources>
