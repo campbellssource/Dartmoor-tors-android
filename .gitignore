@@ -80,5 +80,3 @@ lint-baseline.xml
 # Mac OS
 .DS_Store
 
-# Gradle wrapper jar (we'll let Gradle generate it)
-gradle/wrapper/gradle-wrapper.jar
