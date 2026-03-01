@@ -21,5 +21,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "DartmoorTors"
+rootProject.name = "app"
 include(":app")
