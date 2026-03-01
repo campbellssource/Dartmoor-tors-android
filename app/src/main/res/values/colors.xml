@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="teal">#FF00897B</color>
+    <color name="teal_dark">#FF00695C</color>
+    <color name="green">#FF4CAF50</color>
+    <color name="green_dark">#FF388E3C</color>
+    <color name="orange">#FFFF9800</color>
+    <color name="orange_dark">#FFF57C00</color>
+    <color name="purple">#FF9C27B0</color>
+    
+    <!-- Material 3 seed color based on teal -->
+    <color name="seed">#FF00897B</color>
+    
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- Launcher icon background -->
+    <color name="ic_launcher_background">#FF00897B</color>
+</resources>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dartmoor Tors</string>
+    
+    <!-- Tab names -->
+    <string name="tab_map">Map</string>
+    <string name="tab_collection">Collection</string>
+    <string name="tab_photos">Photos</string>
+    <string name="tab_search">Search</string>
+    
+    <!-- Map view -->
+    <string name="my_location">My Location</string>
+    <string name="compass">Compass</string>
+    <string name="map_style">Map Style</string>
+    <string name="map_normal">Normal</string>
+    <string name="map_satellite">Satellite</string>
+    <string name="map_hybrid">Hybrid</string>
+    <string name="map_terrain">Terrain</string>
+    <string name="show_photos">Show Photos</string>
+    
+    <!-- Tor detail -->
+    <string name="height_meters">%d m</string>
+    <string name="grid_ref">Grid Ref: %s</string>
+    <string name="latitude">Lat: %.6f</string>
+    <string name="longitude">Lon: %.6f</string>
+    <string name="mark_visited">Mark as Visited</string>
+    <string name="unmark_visited">Unmark as Visited</string>
+    <string name="visited_on">Visited on %s</string>
+    <string name="show_on_map">Show on Map</string>
+    <string name="open_in_google_maps">Open in Google Maps</string>
+    <string name="tors_of_dartmoor">Tors of Dartmoor</string>
+    <string name="wikipedia">Wikipedia</string>
+    <string name="add_photo">Add Photo</string>
+    <string name="change_photo">Change</string>
+    <string name="remove_photo">Remove</string>
+    
+    <!-- Search -->
+    <string name="search_tors">Search tors…</string>
+    <string name="no_results">No tors found</string>
+    <string name="sort_by">Sort by</string>
+    <string name="sort_height">Height</string>
+    <string name="sort_name_az">Name A–Z</string>
+    <string name="sort_name_za">Name Z–A</string>
+    <string name="sort_distance">Distance</string>
+    <string name="sort_north_south">North to South</string>
+    <string name="sort_south_north">South to North</string>
+    <string name="sort_east_west">East to West</string>
+    <string name="sort_west_east">West to East</string>
+    
+    <!-- Filters -->
+    <string name="filter_accessible">Accessible</string>
+    <string name="filter_visited">Visited</string>
+    <string name="filter_unvisited">Unvisited</string>
+    
+    <!-- Collection view -->
+    <string name="about_app">This app uses the tors and categories from Tors of Dartmoor. There are over 900 tors in total but the default filters show around 310 of the most prominent accessible ones.</string>
+    <string name="tors_of_dartmoor_collection">Tors of Dartmoor Collection</string>
+    <string name="tors_of_dartmoor_credits">The Tors of Dartmoor Collection is a comprehensive database of every tor on Dartmoor, meticulously researched by Tim Jenkinson since the mid-1990s. In 2017, Tim teamed up with Paul Buck and Max Piper to get all the tors logged and photographed.</string>
+    <string name="additional_credits">Paul is the instigator, designer and webmaster for Tors of Dartmoor. Max has explored extensively and published a specialist book on East Dartmoor\'s lesser-known tors.</string>
+    <string name="profit_sharing">Any profit from this app will be shared annually with the Tors of Dartmoor website.</string>
+    <string name="tor_types">Tor Types</string>
+    <string name="access_filter">Access Filter</string>
+    <string name="accessible_only">Accessible Only</string>
+    <string name="progress">Progress</string>
+    <string name="total_tors">Total Tors</string>
+    <string name="visited_tors">Visited</string>
+    <string name="remaining_tors">Remaining</string>
+    
+    <!-- Classifications -->
+    <string name="classification_summit">Summit</string>
+    <string name="classification_summit_avenue">Summit Avenue</string>
+    <string name="classification_valley_side">Valley Side</string>
+    <string name="classification_spur">Spur</string>
+    <string name="classification_emergent">Emergent</string>
+    <string name="classification_small">Small</string>
+    <string name="classification_ruined">Ruined</string>
+    <string name="classification_clitter">Clitter</string>
+    <string name="classification_gorge">Gorge</string>
+    <string name="classification_gully">Gully</string>
+    <string name="classification_artificial">Artificial</string>
+    <string name="classification_boulder">Boulder</string>
+    <string name="classification_glacial_remains">Glacial Remains</string>
+    
+    <!-- Access levels -->
+    <string name="access_public">Public</string>
+    <string name="access_public_part_private">Public (part private)</string>
+    <string name="access_private_accessible">Private (but accessible)</string>
+    <string name="access_private_fee">Private (fee required)</string>
+    <string name="access_private_visible">Private (visible only)</string>
+    <string name="access_private_permission">Private (seek permission)</string>
+    <string name="access_private_no_access">Private (no access)</string>
+    
+    <!-- Photos tab -->
+    <string name="scan_photo_library">Scan Photo Library</string>
+    <string name="create_album">Create Album</string>
+    <string name="dartmoor_tors_album">Dartmoor Tors Album</string>
+    <string name="view_album">View Album</string>
+    <string name="bag_tors_together">Bag Tors Together</string>
+    <string name="link_shared_album">Link a Shared Album</string>
+    
+    <!-- Welcome screen -->
+    <string name="welcome_collection">Choose tors to bag in Collection</string>
+    <string name="welcome_search">Search, filter and sort tors</string>
+    <string name="welcome_photos">Add photos and create an album</string>
+    <string name="find_photos_cta">Find tors from your photos</string>
+    <string name="skip">Skip</string>
+    
+    <!-- Location -->
+    <string name="location_permission_required">Location permission is required to show your position on the map.</string>
+    <string name="open_settings">Open Settings</string>
+    
+    <!-- Errors -->
+    <string name="error_loading_tors">Error loading tors</string>
+    <string name="retry">Retry</string>
+</resources>

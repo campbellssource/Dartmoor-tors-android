@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Mountain/Tor shape -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,20 L84,75 L24,75 Z"/>
+    <path
+        android:fillColor="#E0E0E0"
+        android:pathData="M45,35 L60,55 L30,55 Z"/>
+</vector>

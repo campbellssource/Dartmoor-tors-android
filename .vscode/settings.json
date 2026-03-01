@@ -1,0 +1,22 @@
+{
+  "editor.formatOnSave": true,
+  "editor.tabSize": 4,
+  "files.associations": {
+    "*.kts": "kotlin"
+  },
+  "[kotlin]": {
+    "editor.defaultFormatter": "fwcd.kotlin"
+  },
+  "kotlin.languageServer.enabled": true,
+  "gradle.autoDetect": "on",
+  "gradle.javaDebug.cleanOutput": false,
+  "search.exclude": {
+    "**/build": true,
+    "**/.gradle": true
+  },
+  "files.exclude": {
+    "**/.gradle": true,
+    "**/build": true,
+    "**/*.iml": true
+  }
+}
