@@ -11,12 +11,14 @@ Users can associate photos from their photo library with tors they've visited. T
 **[Platform-specific]** Photo library access:
 
 **[iOS]**
+
 - Uses PhotoKit (`PHPhotoLibrary.shared()`) with `PhotosPicker`
 - Stores `PHAsset.localIdentifier` in the VisitedTor model
 - Cross-device sync via `PHCloudIdentifier` (requires iCloud Photos)
 - Requires `NSPhotoLibraryUsageDescription` in Info.plist
 
 **[Android]**
+
 - Uses Android Photo Picker API for user-initiated photo selection
 - Store content URI in VisitedTor model
 - **Limitation**: Google Photos API removed library scanning scopes in March 2025
@@ -24,6 +26,7 @@ Users can associate photos from their photo library with tors they've visited. T
 - Requires no permissions for Photo Picker (user-initiated selection only)
 
 **Both platforms:**
+
 - In-memory caching for loaded images
 - Lightweight reference storage (no image duplication)
 
@@ -62,7 +65,7 @@ VisitedTor:
   - photoAssetIdentifier: String?  // Platform-specific photo reference
   - photoCloudIdentifier: String?  // For cross-device sync
   - checklist: Checklist
-  
+
   - hasPhoto: Boolean (computed from photoAssetIdentifier != null)
 ```
 
@@ -139,6 +142,7 @@ Scan the user's photo library to find photos taken near tors and suggest associa
 ### Visit Date Behavior
 
 When adding a photo to a tor via auto-match:
+
 - **Unvisited tor**: Automatically marks as visited using the photo's creation date
 - **Already visited tor**: Adds photo; if photo date is earlier than existing visit date, updates visit date to match
 - This allows users to backfill their visit history from old photos
@@ -228,11 +232,13 @@ Create a dedicated "Dartmoor Tors" album in the device's photo library that auto
 ### Technical Implementation
 
 **[iOS]**
+
 - Album created using `PHAssetCollectionChangeRequest.creationRequestForAssetCollection`
 - Photos added via `PHAssetCollectionChangeRequest.addAssets()`
 - Album identifier stored in UserDefaults for persistence
 
 **[Android]**
+
 - Create album via MediaStore
 - Track album ID in SharedPreferences
 - Add photos to album via MediaStore insert
@@ -262,33 +268,34 @@ If a stored photo reference fails to load (e.g., due to identifier changes betwe
 
 ## Files (iOS Implementation)
 
-| File | Purpose |
-|------|---------|
-| `Services/PhotoService.swift` | Image loading, caching, authorization, album management |
-| `Models/VisitedTor.swift` | Contains `photoAssetIdentifier` property |
-| `Views/PhotosView.swift` | Photos tab - album setup, shared album linking, auto-match scanning, album viewer |
-| `Views/Components/TorPlaceCard.swift` | Hero photo thumbnail with album badges |
-| `Views/Components/PhotoViewerView.swift` | Full-screen photo viewer with zoom/pan and album actions |
-| `Views/Components/FindPhotosView.swift` | Auto-match scanning flow |
-| `Views/TorsMapView.swift` | Photo indicators on map annotations, photos layer |
-| `Info.plist` | `NSPhotoLibraryUsageDescription` |
+| File                                     | Purpose                                                                           |
+| ---------------------------------------- | --------------------------------------------------------------------------------- |
+| `Services/PhotoService.swift`            | Image loading, caching, authorization, album management                           |
+| `Models/VisitedTor.swift`                | Contains `photoAssetIdentifier` property                                          |
+| `Views/PhotosView.swift`                 | Photos tab - album setup, shared album linking, auto-match scanning, album viewer |
+| `Views/Components/TorPlaceCard.swift`    | Hero photo thumbnail with album badges                                            |
+| `Views/Components/PhotoViewerView.swift` | Full-screen photo viewer with zoom/pan and album actions                          |
+| `Views/Components/FindPhotosView.swift`  | Auto-match scanning flow                                                          |
+| `Views/TorsMapView.swift`                | Photo indicators on map annotations, photos layer                                 |
+| `Info.plist`                             | `NSPhotoLibraryUsageDescription`                                                  |
 
 ---
 
 ## Implementation Status
 
-| Feature | iOS | Android |
-|---------|-----|---------|
-| Feature 1: Photos on Tor Detail | ✅ Implemented | ✅ Implemented (Photo Picker) |
-| Feature 2: Photos Layer on Map | ✅ Implemented | ❌ Not possible (Google Photos API limitation) |
-| Feature 3: Auto-Match Photos | ✅ Implemented | ❌ Not possible (Google Photos API limitation) |
-| Feature 4: Shared Album | ✅ Implemented | ❌ Not possible (API removed March 2025) |
-| Feature 5: Dartmoor Tors Album | ✅ Implemented | ❌ Not possible (requires library access) |
-| Feature 6: Location Fallback | ✅ Implemented | ❌ Not possible (requires GPS access) |
+| Feature                         | iOS            | Android                                        |
+| ------------------------------- | -------------- | ---------------------------------------------- |
+| Feature 1: Photos on Tor Detail | ✅ Implemented | ✅ Implemented (Photo Picker)                  |
+| Feature 2: Photos Layer on Map  | ✅ Implemented | ❌ Not possible (Google Photos API limitation) |
+| Feature 3: Auto-Match Photos    | ✅ Implemented | ❌ Not possible (Google Photos API limitation) |
+| Feature 4: Shared Album         | ✅ Implemented | ❌ Not possible (API removed March 2025)       |
+| Feature 5: Dartmoor Tors Album  | ✅ Implemented | ❌ Not possible (requires library access)      |
+| Feature 6: Location Fallback    | ✅ Implemented | ❌ Not possible (requires GPS access)          |
 
 ### Android Limitations
 
 As of March 2025, Google removed the `photoslibrary.readonly`, `photoslibrary.sharing`, and `photoslibrary` scopes from the Google Photos Library API. Apps can no longer:
+
 - Programmatically scan a user's photo library
 - Access GPS/location metadata from photos
 - Manage shared albums

@@ -13,23 +13,27 @@ An Android app for exploring and tracking visits to Dartmoor tors. Displays 900+
 ### Starting the Emulator
 
 1. **List available emulators:**
+
    ```bash
    ~/Library/Android/sdk/emulator/emulator -list-avds
    ```
 
 2. **Start an emulator:**
+
    ```bash
    ~/Library/Android/sdk/emulator/emulator -avd Medium_Phone_API_36.1
    ```
-   
+
    Or use the workspace task: `Start Emulator` from VS Code
 
 3. **Verify device is connected:**
+
    ```bash
    ~/Library/Android/sdk/platform-tools/adb devices
    ```
-   
+
    You should see output like:
+
    ```
    List of devices attached
    emulator-5554   device
@@ -38,11 +42,13 @@ An Android app for exploring and tracking visits to Dartmoor tors. Displays 900+
 ### Building and Installing
 
 1. **Build the debug APK:**
+
    ```bash
    ./gradlew assembleDebug
    ```
 
 2. **Install on connected device/emulator:**
+
    ```bash
    ./gradlew installDebug
    ```
