@@ -1,0 +1,52 @@
+[
+  {
+    "id": "public",
+    "name": "Public",
+    "description": "A collection from the Tors of Dartmoor website of notable and accessible tors.",
+    "introduction": "This is a list of 625 tors and significant rocks that exist on land accessible to the Public. Please note this also includes those that are 'Public (part private)' and should you wish to visit the private sections, then permission from the landowner should be sought.",
+    "imageAsset": null,
+    "url": "https://www.torsofdartmoor.co.uk/results_public.php",
+    "hasSubFilters": false,
+    "sortOrder": 0
+  },
+  {
+    "id": "tors-of-dartmoor",
+    "name": "Tors of Dartmoor",
+    "description": "The complete database of every tor on Dartmoor.",
+    "introduction": "A comprehensive database of every tor on Dartmoor, meticulously researched by Tim Jenkinson since the mid-1990s. In 2017, Tim teamed up with Paul Buck and Max Piper to get all the tors logged and photographed.",
+    "imageAsset": null,
+    "url": "https://www.torsofdartmoor.co.uk",
+    "hasSubFilters": true,
+    "sortOrder": 1
+  },
+  {
+    "id": "os-map",
+    "name": "OS Map Tors",
+    "description": "Tors marked on Ordnance Survey maps.",
+    "introduction": "This is a list of 267 tors and significant rocks represented on 1:25,000 Ordnance Survey maps: Central – OL28 Dartmoor, East – OL44 Torquay & Dawlish, West – 112 Launceston & Holsworthy",
+    "imageAsset": null,
+    "url": "https://www.torsofdartmoor.co.uk/results_os_maps.php",
+    "hasSubFilters": false,
+    "sortOrder": 2
+  },
+  {
+    "id": "compendium",
+    "name": "Dartmoor Compendium",
+    "description": "From the first edition of Josephine M Collingwood's book",
+    "introduction": "This list of 155 tors from Josephine M Collingwood's Dartmoor Compendium.",
+    "imageAsset": null,
+    "url": "https://www.tavicinitypublishing.co.uk/dartmoor-tors-compendium.html",
+    "hasSubFilters": false,
+    "sortOrder": 3
+  },
+  {
+    "id": "rock-idols",
+    "name": "Rock Idols",
+    "description": "Rock Idols. A guide to Dartmoor in 28 Tors.",
+    "introduction": "Fantastical yet natural, Dartmoor’s 280-million-year-old tors are among the most iconic landmarks in Southern Britain. Victorian antiquarians described them as ‘rock idols’, believing them to be stone deities worshipped by the Druids. Thousands of years before that, they inspired our ancestors who built ceremonial stone rows and circles aligned with them. Today, the tors are loved by walkers, climbers and locals, who visit in their thousands every year",
+    "imageAsset": null,
+    "url": "https://uk.bookshop.org/a/17063/9781910636534",
+    "hasSubFilters": false,
+    "sortOrder": 4
+  }
+]

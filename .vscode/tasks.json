@@ -1,0 +1,85 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Debug APK",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": ["assembleDebug"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Install Debug APK",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": ["installDebug"],
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Run Tests",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": ["test"],
+      "group": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Clean",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": ["clean"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "List Emulators",
+      "type": "shell",
+      "command": "$ANDROID_HOME/emulator/emulator",
+      "args": ["-list-avds"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Start Emulator",
+      "type": "shell",
+      "command": "$ANDROID_HOME/emulator/emulator",
+      "args": ["-avd", "${input:emulatorName}"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "isBackground": true
+    }
+  ],
+  "inputs": [
+    {
+      "id": "emulatorName",
+      "type": "promptString",
+      "description": "Enter the AVD name (run 'List Emulators' task to see available devices)"
+    }
+  ]
+}
