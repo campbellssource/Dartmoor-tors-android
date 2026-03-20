@@ -83,6 +83,12 @@ dependencies {
     // Image Loading
     implementation(libs.coil.compose)
     
+    // Permissions
+    implementation(libs.accompanist.permissions)
+    
+    // ExifInterface for photo location
+    implementation(libs.exifinterface)
+    
     // DataStore
     implementation(libs.datastore.preferences)
     

@@ -153,6 +153,7 @@ export PATH=$PATH:$ANDROID_HOME/platform-tools
 ## API Keys
 
 Create `local.properties` with your Google Maps API key:
+
 ```
 MAPS_API_KEY=your_api_key_here
 ```
@@ -173,16 +174,16 @@ MAPS_API_KEY=your_api_key_here
 
 ## Specifications Reference
 
-| Spec File | Description |
-|-----------|-------------|
-| `specs/index.md` | Overview and navigation |
-| `specs/tor-data.md` | Tor data model and loading |
-| `specs/navigation.md` | Tab bar and navigation |
-| `specs/view-tors-map.md` | Map view implementation |
-| `specs/view-tor-detail.md` | Tor detail sheet |
-| `specs/view-tor-types.md` | Collection/filter view |
-| `specs/photos.md` | Photo features |
-| `specs/user-data.md` | User data storage |
-| `specs/user-location.md` | Location features |
-| `specs/todo.md` | Feature status tracking |
-| `specs/tests.md` | Test scenarios |
+| Spec File                  | Description                |
+| -------------------------- | -------------------------- |
+| `specs/index.md`           | Overview and navigation    |
+| `specs/tor-data.md`        | Tor data model and loading |
+| `specs/navigation.md`      | Tab bar and navigation     |
+| `specs/view-tors-map.md`   | Map view implementation    |
+| `specs/view-tor-detail.md` | Tor detail sheet           |
+| `specs/view-tor-types.md`  | Collection/filter view     |
+| `specs/photos.md`          | Photo features             |
+| `specs/user-data.md`       | User data storage          |
+| `specs/user-location.md`   | Location features          |
+| `specs/todo.md`            | Feature status tracking    |
+| `specs/tests.md`           | Test scenarios             |

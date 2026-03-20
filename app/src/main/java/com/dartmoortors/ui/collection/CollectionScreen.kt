@@ -2,6 +2,7 @@ package com.dartmoortors.ui.collection
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -16,16 +17,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dartmoortors.data.model.Classification
+import com.dartmoortors.data.model.TorCollection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollectionScreen(
     viewModel: CollectionViewModel = hiltViewModel()
 ) {
+    val collections by viewModel.collections.collectAsState()
+    val selectedCollectionId by viewModel.selectedCollectionId.collectAsState()
+    val selectedCollection by viewModel.selectedCollection.collectAsState()
     val enabledClassifications by viewModel.enabledClassifications.collectAsState()
     val accessibleOnly by viewModel.accessibleOnly.collectAsState()
     val classificationCounts by viewModel.classificationCounts.collectAsState()
+    val collectionTorCounts by viewModel.collectionTorCounts.collectAsState()
     val progress by viewModel.progress.collectAsState()
+    val hasSubFilters by viewModel.hasSubFilters.collectAsState()
     val context = LocalContext.current
     
     Column(
@@ -34,62 +41,34 @@ fun CollectionScreen(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        // About section
+        // Collection Selector Section
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "About",
+                    text = "Select Collection",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "This app uses the tors and categories from Tors of Dartmoor. There are over 900 tors in total but the default filters show around 310 of the most prominent accessible ones.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Tors of Dartmoor Collection section
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "Tors of Dartmoor Collection",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "The Tors of Dartmoor Collection is a comprehensive database of every tor on Dartmoor, meticulously researched by Tim Jenkinson since the mid-1990s. In 2017, Tim teamed up with Paul Buck and Max Piper to get all the tors logged and photographed.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Paul is the instigator, designer and webmaster for Tors of Dartmoor. Max has explored extensively and published a specialist book on East Dartmoor's lesser-known tors.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Any profit from this app will be shared annually with the Tors of Dartmoor website.",
+                    text = "Choose which set of tors to display throughout the app.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                OutlinedButton(
-                    onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.torsofdartmoor.co.uk"))
-                        context.startActivity(intent)
-                    }
-                ) {
-                    Icon(Icons.Default.Language, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Visit Tors of Dartmoor")
+                
+                collections.forEach { collection ->
+                    val isSelected = collection.id == selectedCollectionId
+                    val count = collectionTorCounts[collection.id] ?: 0
+                    
+                    CollectionRow(
+                        collection = collection,
+                        torCount = count,
+                        isSelected = isSelected,
+                        onClick = { viewModel.selectCollection(collection.id) }
+                    )
                 }
             }
         }
@@ -109,6 +88,14 @@ fun CollectionScreen(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
+                Spacer(modifier = Modifier.height(4.dp))
+                selectedCollection?.let { collection ->
+                    Text(
+                        text = collection.name,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 Row(
@@ -164,49 +151,179 @@ fun CollectionScreen(
             }
         }
         
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Tor Types section
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "Tor Types",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Classification.entries.forEach { classification ->
-                    val count = classificationCounts[classification] ?: 0
-                    val enabled = enabledClassifications.contains(classification)
+        // Sub-filters Section (only for collections with hasSubFilters = true)
+        if (hasSubFilters) {
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Tor Types",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Filter by classification",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                     
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(
-                                checked = enabled,
-                                onCheckedChange = { viewModel.toggleClassification(classification) }
-                            )
-                            Text(classification.displayName)
+                    Classification.entries.forEach { classification ->
+                        if (classification != Classification.UNKNOWN) {
+                            val count = classificationCounts[classification] ?: 0
+                            val enabled = enabledClassifications.contains(classification)
+                            
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Checkbox(
+                                        checked = enabled,
+                                        onCheckedChange = { viewModel.toggleClassification(classification) }
+                                    )
+                                    Text(classification.displayName)
+                                }
+                                Text(
+                                    text = count.toString(),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
-                        Text(
-                            text = count.toString(),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                     }
                 }
             }
         }
         
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Collection Introduction Section
+        selectedCollection?.let { collection ->
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "About ${collection.name}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = collection.introduction,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    
+                    collection.url?.let { url ->
+                        Spacer(modifier = Modifier.height(12.dp))
+                        OutlinedButton(
+                            onClick = {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                context.startActivity(intent)
+                            }
+                        ) {
+                            Icon(Icons.Default.Language, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Learn More")
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Tors of Dartmoor Credits Section (only shown for Tors of Dartmoor collection)
+        if (selectedCollectionId == TorCollection.TORS_OF_DARTMOOR_ID) {
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Credits",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Paul is the instigator, designer and webmaster for Tors of Dartmoor. Max has explored extensively and published a specialist book on East Dartmoor's lesser-known tors.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Any profit from this app will be shared annually with the Tors of Dartmoor website.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+        
         Spacer(modifier = Modifier.height(32.dp))
+    }
+}
+
+@Composable
+private fun CollectionRow(
+    collection: TorCollection,
+    torCount: Int,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 4.dp),
+        color = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface,
+        shape = MaterialTheme.shapes.small
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = collection.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                )
+                Text(
+                    text = collection.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = torCount.toString(),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (isSelected) {
+                    Icon(
+                        Icons.Default.Check,
+                        contentDescription = "Selected",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
     }
 }
 

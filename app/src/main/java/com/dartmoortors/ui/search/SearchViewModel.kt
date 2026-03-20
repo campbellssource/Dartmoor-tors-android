@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import com.dartmoortors.data.model.*
+import com.dartmoortors.data.repository.CollectionRepository
 import com.dartmoortors.data.repository.PreferencesRepository
 import com.dartmoortors.data.repository.TorRepository
 import com.dartmoortors.data.repository.VisitedTorRepository
@@ -14,6 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val torRepository: TorRepository,
+    private val collectionRepository: CollectionRepository,
     private val visitedTorRepository: VisitedTorRepository,
     private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
@@ -37,51 +39,90 @@ class SearchViewModel @Inject constructor(
         .enabledClassifications
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Classification.entries.filter { it.defaultEnabled }.toSet())
     
+    val selectedCollectionId: StateFlow<String> = preferencesRepository
+        .selectedCollectionId
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TorCollection.DEFAULT_COLLECTION_ID)
+    
+    private val selectedCollectionHasSubFilters: StateFlow<Boolean> = combine(
+        collectionRepository.collections,
+        selectedCollectionId
+    ) { collections, selectedId ->
+        collections.find { it.id == selectedId }?.hasSubFilters ?: false
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    
     private val visitedTorIds: StateFlow<Set<String>> = visitedTorRepository
         .getVisitedTorIds()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
     
     /**
-     * Filtered and sorted tors.
+     * Combined filter inputs to reduce combine parameters.
      */
-    val filteredTors: StateFlow<List<TorWithVisitState>> = combine(
+    private data class FilterInputs(
+        val tors: List<Tor>,
+        val visitedIds: Set<String>,
+        val query: String,
+        val classifications: Set<Classification>,
+        val showAccessible: Boolean,
+        val showVisited: Boolean,
+        val showUnvisited: Boolean,
+        val sort: TorSortOption
+    )
+    
+    private val filterInputs = combine(
         torRepository.tors,
         visitedTorIds,
         _searchQuery,
-        enabledClassifications,
-        _showAccessible,
-        _showVisited,
-        _showUnvisited,
-        sortOption
-    ) { values ->
-        val tors = values[0] as List<Tor>
-        val visitedIds = values[1] as Set<String>
-        val query = values[2] as String
-        val classifications = values[3] as Set<Classification>
-        val showAccessible = values[4] as Boolean
-        val showVisited = values[5] as Boolean
-        val showUnvisited = values[6] as Boolean
-        val sort = values[7] as TorSortOption
-        
-        tors.filter { tor ->
-            val matchesQuery = query.isBlank() || tor.name.contains(query, ignoreCase = true)
+        enabledClassifications
+    ) { tors, visitedIds, query, classifications ->
+        Pair(Pair(tors, visitedIds), Pair(query, classifications))
+    }.combine(combine(_showAccessible, _showVisited, _showUnvisited, sortOption) { a, b, c, d ->
+        listOf(a, b, c, d)
+    }) { pair, filterFlags ->
+        FilterInputs(
+            tors = pair.first.first,
+            visitedIds = pair.first.second,
+            query = pair.second.first,
+            classifications = pair.second.second,
+            showAccessible = filterFlags[0] as Boolean,
+            showVisited = filterFlags[1] as Boolean,
+            showUnvisited = filterFlags[2] as Boolean,
+            sort = filterFlags[3] as TorSortOption
+        )
+    }
+    
+    /**
+     * Filtered and sorted tors.
+     */
+    val filteredTors: StateFlow<List<TorWithVisitState>> = combine(
+        filterInputs,
+        selectedCollectionId,
+        selectedCollectionHasSubFilters
+    ) { inputs, collectionId, hasSubFilters ->
+        inputs.tors.filter { tor ->
+            // Must be in selected collection
+            if (!tor.isInCollection(collectionId)) return@filter false
+            
+            val matchesQuery = inputs.query.isBlank() || tor.name.contains(inputs.query, ignoreCase = true)
             val classification = Classification.fromString(tor.classification)
             val access = Access.fromString(tor.access)
-            val isVisited = visitedIds.contains(tor.id)
+            val isVisited = inputs.visitedIds.contains(tor.id)
+            
+            // Only apply classification filter if collection has sub-filters
+            val classificationMatch = !hasSubFilters || inputs.classifications.contains(classification)
             
             matchesQuery &&
-                classifications.contains(classification) &&
-                (!showAccessible || access.isAccessible) &&
-                ((showVisited && isVisited) || (showUnvisited && !isVisited))
+                classificationMatch &&
+                (!inputs.showAccessible || access.isAccessible) &&
+                ((inputs.showVisited && isVisited) || (inputs.showUnvisited && !isVisited))
         }.map { tor ->
             TorWithVisitState(
                 tor = tor,
-                visitedTor = if (visitedIds.contains(tor.id)) {
+                visitedTor = if (inputs.visitedIds.contains(tor.id)) {
                     VisitedTor(torId = tor.id, visitedDate = 0L)
                 } else null
             )
         }.let { list ->
-            when (sort) {
+            when (inputs.sort) {
                 TorSortOption.HEIGHT_DESC -> list.sortedByDescending { it.tor.heightMeters }
                 TorSortOption.HEIGHT_ASC -> list.sortedBy { it.tor.heightMeters }
                 TorSortOption.NAME_ASC -> list.sortedBy { it.tor.name }
@@ -98,6 +139,7 @@ class SearchViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             torRepository.loadTors()
+            collectionRepository.loadCollections()
         }
     }
     

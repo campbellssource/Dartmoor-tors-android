@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import com.dartmoortors.data.model.Classification
+import com.dartmoortors.data.model.TorCollection
 import com.dartmoortors.data.model.TorSortOption
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,7 +31,23 @@ class PreferencesRepository @Inject constructor(
         val SORT_OPTION = stringPreferencesKey("sort_option")
         val MAP_TYPE = intPreferencesKey("map_type")
         val SHOW_PHOTOS_LAYER = booleanPreferencesKey("show_photos_layer")
+        val SELECTED_COLLECTION_ID = stringPreferencesKey("selected_collection_id")
     }
+    
+    /**
+     * Get the currently selected collection ID.
+     */
+    val selectedCollectionId: Flow<String> = context.dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences ->
+            preferences[PreferencesKeys.SELECTED_COLLECTION_ID] ?: TorCollection.DEFAULT_COLLECTION_ID
+        }
     
     /**
      * Get enabled classifications.
@@ -45,10 +62,11 @@ class PreferencesRepository @Inject constructor(
         }
         .map { preferences ->
             val names = preferences[PreferencesKeys.ENABLED_CLASSIFICATIONS]
-            if (names.isNullOrEmpty()) {
-                // Default enabled classifications
+            if (names == null) {
+                // First launch - use default enabled classifications
                 Classification.entries.filter { it.defaultEnabled }.toSet()
             } else {
+                // User has made a choice - honor it (even if empty)
                 names.mapNotNull { name ->
                     Classification.entries.find { it.name == name }
                 }.toSet()
@@ -203,6 +221,15 @@ class PreferencesRepository @Inject constructor(
     suspend fun setShowPhotosLayer(show: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.SHOW_PHOTOS_LAYER] = show
+        }
+    }
+    
+    /**
+     * Update selected collection ID.
+     */
+    suspend fun setSelectedCollectionId(collectionId: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SELECTED_COLLECTION_ID] = collectionId
         }
     }
 }

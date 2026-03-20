@@ -21,7 +21,8 @@ data class Tor(
     @SerializedName("torsOfDartmoorURL")
     val torsOfDartmoorURL: String?,
     @SerializedName("wikipediaURL")
-    val wikipediaURL: String?
+    val wikipediaURL: String?,
+    val collections: List<String> = emptyList()
 ) {
     /**
      * Returns the classification enum value.
@@ -40,6 +41,13 @@ data class Tor(
      */
     val isAccessible: Boolean
         get() = accessEnum.isAccessible
+    
+    /**
+     * Returns true if this tor belongs to the specified collection.
+     */
+    fun isInCollection(collectionId: String): Boolean {
+        return collections.contains(collectionId)
+    }
 }
 
 /**

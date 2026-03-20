@@ -13,6 +13,9 @@ interface VisitedTorDao {
     @Query("SELECT * FROM visited_tors WHERE checklistId = :checklistId")
     fun getVisitedTors(checklistId: String = "default"): Flow<List<VisitedTor>>
     
+    @Query("SELECT * FROM visited_tors WHERE checklistId = :checklistId")
+    suspend fun getVisitedTorsOnce(checklistId: String = "default"): List<VisitedTor>
+    
     @Query("SELECT * FROM visited_tors WHERE torId = :torId LIMIT 1")
     suspend fun getVisitedTor(torId: String): VisitedTor?
     

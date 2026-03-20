@@ -13,8 +13,7 @@ import androidx.compose.ui.window.Dialog
 
 @Composable
 fun WelcomeDialog(
-    onDismiss: () -> Unit,
-    onFindPhotos: () -> Unit
+    onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -46,26 +45,17 @@ fun WelcomeDialog(
                 
                 WelcomeFeatureItem(
                     icon = Icons.Default.PhotoLibrary,
-                    text = "Add photos and create an album"
+                    text = "Add photos to visited tors"
                 )
                 
                 Spacer(modifier = Modifier.height(32.dp))
                 
-                // Primary CTA
+                // Get Started button
                 Button(
-                    onClick = onFindPhotos,
+                    onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(Icons.Default.PhotoCamera, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Find tors from your photos")
-                }
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                // Skip link
-                TextButton(onClick = onDismiss) {
-                    Text("Skip")
+                    Text("Get Started")
                 }
             }
         }

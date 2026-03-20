@@ -17,10 +17,11 @@ Users can associate photos from their photo library with tors they've visited. T
 - Requires `NSPhotoLibraryUsageDescription` in Info.plist
 
 **[Android]**
-- Use MediaStore API or Photo Picker API
-- Store content URI or media ID
-- Cross-device sync via Google Photos API (if available) or store photo hash
-- Requires `READ_MEDIA_IMAGES` permission (Android 13+) or `READ_EXTERNAL_STORAGE` (older)
+- Uses Android Photo Picker API for user-initiated photo selection
+- Store content URI in VisitedTor model
+- **Limitation**: Google Photos API removed library scanning scopes in March 2025
+- Features requiring GPS metadata scanning (Photos Layer, Auto-Match) not available
+- Requires no permissions for Photo Picker (user-initiated selection only)
 
 **Both platforms:**
 - In-memory caching for loaded images
@@ -278,9 +279,18 @@ If a stored photo reference fails to load (e.g., due to identifier changes betwe
 
 | Feature | iOS | Android |
 |---------|-----|---------|
-| Feature 1: Photos on Tor Detail | ✅ Implemented | Not started |
-| Feature 2: Photos Layer on Map | ✅ Implemented | Not started |
-| Feature 3: Auto-Match Photos | ✅ Implemented | Not started |
-| Feature 4: Shared Album | ✅ Implemented | Not started (API research needed) |
-| Feature 5: Dartmoor Tors Album | ✅ Implemented | Not started |
-| Feature 6: Location Fallback | ✅ Implemented | Not started |
+| Feature 1: Photos on Tor Detail | ✅ Implemented | ✅ Implemented (Photo Picker) |
+| Feature 2: Photos Layer on Map | ✅ Implemented | ❌ Not possible (Google Photos API limitation) |
+| Feature 3: Auto-Match Photos | ✅ Implemented | ❌ Not possible (Google Photos API limitation) |
+| Feature 4: Shared Album | ✅ Implemented | ❌ Not possible (API removed March 2025) |
+| Feature 5: Dartmoor Tors Album | ✅ Implemented | ❌ Not possible (requires library access) |
+| Feature 6: Location Fallback | ✅ Implemented | ❌ Not possible (requires GPS access) |
+
+### Android Limitations
+
+As of March 2025, Google removed the `photoslibrary.readonly`, `photoslibrary.sharing`, and `photoslibrary` scopes from the Google Photos Library API. Apps can no longer:
+- Programmatically scan a user's photo library
+- Access GPS/location metadata from photos
+- Manage shared albums
+
+The **Google Photos Picker API** still allows users to manually select photos, but does not provide location data. This means Android users can add photos to visited tors using the Photo Picker, but cannot use features that require scanning the library for nearby photos.

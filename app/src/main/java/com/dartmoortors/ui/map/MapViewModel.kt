@@ -10,9 +10,13 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import com.dartmoortors.data.location.LocationService
 import com.dartmoortors.data.model.*
+import com.dartmoortors.data.repository.CollectionRepository
+import com.dartmoortors.data.repository.PhotoRepository
 import com.dartmoortors.data.repository.PreferencesRepository
 import com.dartmoortors.data.repository.TorRepository
+import com.dartmoortors.data.repository.TorWithDistance
 import com.dartmoortors.data.repository.VisitedTorRepository
+import com.dartmoortors.service.PhotoService
 import javax.inject.Inject
 
 private const val TAG = "MapViewModel"
@@ -32,8 +36,11 @@ enum class TrackingMode {
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val torRepository: TorRepository,
+    private val collectionRepository: CollectionRepository,
     private val visitedTorRepository: VisitedTorRepository,
     private val preferencesRepository: PreferencesRepository,
+    private val photoService: PhotoService,
+    private val photoRepository: PhotoRepository,
     val locationService: LocationService
 ) : ViewModel() {
     
@@ -48,6 +55,12 @@ class MapViewModel @Inject constructor(
     private val _selectedTorId = MutableStateFlow<String?>(null)
     val selectedTorId: StateFlow<String?> = _selectedTorId.asStateFlow()
     
+    private val _selectedPhoto = MutableStateFlow<Photo?>(null)
+    val selectedPhoto: StateFlow<Photo?> = _selectedPhoto.asStateFlow()
+    
+    private val _nearbyTorsForPhoto = MutableStateFlow<List<TorWithDistance>>(emptyList())
+    val nearbyTorsForPhoto: StateFlow<List<TorWithDistance>> = _nearbyTorsForPhoto.asStateFlow()
+    
     private val _showWelcome = MutableStateFlow(true)
     val showWelcome: StateFlow<Boolean> = _showWelcome.asStateFlow()
     
@@ -59,6 +72,13 @@ class MapViewModel @Inject constructor(
     
     private val _trackingMode = MutableStateFlow(TrackingMode.NONE)
     val trackingMode: StateFlow<TrackingMode> = _trackingMode.asStateFlow()
+    
+    // Photos for map layer
+    private val _mapPhotos = MutableStateFlow<List<Photo>>(emptyList())
+    val mapPhotos: StateFlow<List<Photo>> = _mapPhotos.asStateFlow()
+    
+    private val _isLoadingPhotos = MutableStateFlow(false)
+    val isLoadingPhotos: StateFlow<Boolean> = _isLoadingPhotos.asStateFlow()
     
     // Location state from LocationService
     val currentLocation: StateFlow<Location?> = locationService.currentLocation
@@ -76,9 +96,24 @@ class MapViewModel @Inject constructor(
         .accessibleOnly
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
     
+    val selectedCollectionId: StateFlow<String> = preferencesRepository
+        .selectedCollectionId
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TorCollection.DEFAULT_COLLECTION_ID)
+    
+    private val selectedCollectionHasSubFilters: StateFlow<Boolean> = combine(
+        collectionRepository.collections,
+        selectedCollectionId
+    ) { collections, selectedId ->
+        collections.find { it.id == selectedId }?.hasSubFilters ?: false
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    
     val mapType: StateFlow<Int> = preferencesRepository
         .mapType
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+    
+    val showPhotosLayer: StateFlow<Boolean> = preferencesRepository
+        .showPhotosLayer
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
     
     private val visitedTorIds: StateFlow<Set<String>> = visitedTorRepository
         .getVisitedTorIds()
@@ -87,25 +122,47 @@ class MapViewModel @Inject constructor(
     /**
      * Filtered tors based on current filter settings.
      */
-    val filteredTors: StateFlow<List<TorWithVisitState>> = combine(
+    private val filterInputs = combine(
         torRepository.tors,
         visitedTorIds,
         enabledClassifications,
         accessibleOnly
     ) { tors, visitedIds, classifications, accessibleOnly ->
-        Log.d(TAG, "Filtering tors: total=${tors.size}, classifications=${classifications.map { it.name }}, accessibleOnly=$accessibleOnly")
-        val filtered = tors.filter { tor ->
-            val classification = Classification.fromString(tor.classification)
+        FilterInputs(tors, visitedIds, classifications, accessibleOnly)
+    }
+    
+    private data class FilterInputs(
+        val tors: List<Tor>,
+        val visitedIds: Set<String>,
+        val classifications: Set<Classification>,
+        val accessibleOnly: Boolean
+    )
+    
+    val filteredTors: StateFlow<List<TorWithVisitState>> = combine(
+        filterInputs,
+        selectedCollectionId,
+        selectedCollectionHasSubFilters
+    ) { inputs, collectionId, hasSubFilters ->
+        Log.d(TAG, "Filtering tors: total=${inputs.tors.size}, collection=$collectionId, hasSubFilters=$hasSubFilters, classifications=${inputs.classifications.map { it.name }}, accessibleOnly=${inputs.accessibleOnly}")
+        val filtered = inputs.tors.filter { tor ->
+            // Must be in selected collection
+            if (!tor.isInCollection(collectionId)) return@filter false
+            
+            // Only apply classification filter if collection has sub-filters
+            if (hasSubFilters) {
+                val classification = Classification.fromString(tor.classification)
+                if (!inputs.classifications.contains(classification)) return@filter false
+            }
+            
+            // Apply access filter
             val access = Access.fromString(tor.access)
+            if (inputs.accessibleOnly && !access.isAccessible) return@filter false
             
-            val classMatch = classifications.contains(classification)
-            val accessMatch = !accessibleOnly || access.isAccessible
-            
-            classMatch && accessMatch
+            true
         }.map { tor ->
             TorWithVisitState(
                 tor = tor,
-                visitedTor = if (visitedIds.contains(tor.id)) {
+                visitedTor = if (inputs.visitedIds.contains(tor.id)) {
                     VisitedTor(torId = tor.id, visitedDate = 0L) // Simplified - real data loaded separately
                 } else null
             )
@@ -135,12 +192,97 @@ class MapViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             torRepository.loadTors()
+            collectionRepository.loadCollections()
         }
         
         viewModelScope.launch {
             preferencesRepository.showWelcome.collect { show ->
                 _showWelcome.value = show
             }
+        }
+        
+        // Load photos when photos layer is enabled
+        viewModelScope.launch {
+            showPhotosLayer.collect { enabled ->
+                if (enabled) {
+                    loadPhotosForMap()
+                } else {
+                    _mapPhotos.value = emptyList()
+                }
+            }
+        }
+    }
+    
+    /**
+     * Load photos with location data within Dartmoor bounds.
+     */
+    private fun loadPhotosForMap() {
+        viewModelScope.launch {
+            _isLoadingPhotos.value = true
+            try {
+                val photos = photoRepository.getPhotosForMap()
+                _mapPhotos.value = photos
+                Log.d(TAG, "Loaded ${photos.size} photos for map")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load photos for map", e)
+            } finally {
+                _isLoadingPhotos.value = false
+            }
+        }
+    }
+    
+    /**
+     * Refresh photos on the map layer.
+     */
+    fun refreshMapPhotos() {
+        if (showPhotosLayer.value) {
+            loadPhotosForMap()
+        }
+    }
+    
+    /**
+     * Select a photo to show in the preview sheet.
+     */
+    fun selectPhoto(photo: Photo) {
+        _selectedPhoto.value = photo
+        viewModelScope.launch {
+            _nearbyTorsForPhoto.value = photoRepository.findTorsNearPhoto(photo)
+        }
+        photo.latitude?.let { lat ->
+            photo.longitude?.let { lon ->
+                _cameraTarget.value = LatLng(lat, lon)
+                _cameraZoom.value = DETAIL_ZOOM
+            }
+        }
+    }
+    
+    /**
+     * Deselect the current photo.
+     */
+    fun deselectPhoto() {
+        _selectedPhoto.value = null
+        _nearbyTorsForPhoto.value = emptyList()
+    }
+    
+    /**
+     * Associate a photo with a tor from the photo preview sheet.
+     */
+    fun associatePhotoWithTor(photo: Photo, torId: String) {
+        viewModelScope.launch {
+            photoRepository.associatePhotoWithTor(torId, photo)
+            _selectedPhoto.value = null
+            _nearbyTorsForPhoto.value = emptyList()
+            // Refresh to remove the associated photo from the map layer
+            refreshMapPhotos()
+        }
+    }
+    
+    /**
+     * Toggle photos layer visibility.
+     */
+    fun setShowPhotosLayer(show: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setShowPhotosLayer(show)
         }
     }
     
@@ -212,5 +354,113 @@ class MapViewModel @Inject constructor(
      */
     fun clearCameraTarget() {
         _cameraTarget.value = null
+    }
+    
+    /**
+     * Check if location permission is available.
+     */
+    fun hasLocationPermission(): Boolean = locationService.hasLocationPermission()
+    
+    /**
+     * Check if photo permission is available.
+     */
+    fun hasPhotoPermission(): Boolean = photoService.hasPhotoPermission()
+    
+    /**
+     * Get the permission string needed for reading photos.
+     */
+    fun getRequiredPhotoPermission(): String = photoService.getRequiredPhotoPermission()
+    
+    /**
+     * Start location tracking.
+     */
+    fun startLocationTracking() {
+        locationService.startLocationUpdates()
+        locationService.startCompassUpdates()
+    }
+    
+    /**
+     * Stop location tracking.
+     */
+    fun stopLocationTracking() {
+        locationService.stopLocationUpdates()
+        locationService.stopCompassUpdates()
+        _trackingMode.value = TrackingMode.NONE
+    }
+    
+    /**
+     * Cycle through tracking modes: NONE -> FOLLOW -> FOLLOW_COMPASS -> NONE
+     */
+    fun cycleTrackingMode() {
+        _trackingMode.value = when (_trackingMode.value) {
+            TrackingMode.NONE -> TrackingMode.FOLLOW
+            TrackingMode.FOLLOW -> TrackingMode.FOLLOW_COMPASS
+            TrackingMode.FOLLOW_COMPASS -> TrackingMode.NONE
+        }
+        
+        // If entering a tracking mode, center on current location
+        if (_trackingMode.value != TrackingMode.NONE) {
+            currentLocation.value?.let { location ->
+                _cameraTarget.value = LatLng(location.latitude, location.longitude)
+                _cameraZoom.value = LOCATION_ZOOM
+            }
+        }
+    }
+    
+    /**
+     * Set tracking mode directly.
+     */
+    fun setTrackingMode(mode: TrackingMode) {
+        _trackingMode.value = mode
+    }
+    
+    /**
+     * Called when user manually moves the camera.
+     */
+    fun onUserCameraMove() {
+        // Disable tracking when user manually moves the map
+        if (_trackingMode.value != TrackingMode.NONE) {
+            _trackingMode.value = TrackingMode.NONE
+        }
+    }
+    
+    /**
+     * Move camera to current location.
+     */
+    fun goToMyLocation() {
+        currentLocation.value?.let { location ->
+            _cameraTarget.value = LatLng(location.latitude, location.longitude)
+            _cameraZoom.value = LOCATION_ZOOM
+        }
+    }
+    
+    /**
+     * Get distance from current location to a tor in meters.
+     */
+    fun distanceToTor(tor: Tor): Float? {
+        return locationService.distanceTo(tor.latitude, tor.longitude)
+    }
+    
+    /**
+     * Set photo for a visited tor.
+     */
+    fun setTorPhoto(torId: String, photoUri: String?) {
+        viewModelScope.launch {
+            visitedTorRepository.setPhoto(torId, photoUri)
+        }
+    }
+    
+    /**
+     * Remove photo from a visited tor.
+     */
+    fun removeTorPhoto(torId: String) {
+        viewModelScope.launch {
+            visitedTorRepository.setPhoto(torId, null)
+        }
+    }
+    
+    override fun onCleared() {
+        super.onCleared()
+        stopLocationTracking()
     }
 }

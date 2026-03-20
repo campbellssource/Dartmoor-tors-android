@@ -79,6 +79,13 @@ class TorRepository @Inject constructor(
     }
     
     /**
+     * Get all tors as a list.
+     */
+    fun getAllTors(): List<Tor> {
+        return _tors.value
+    }
+    
+    /**
      * Search tors by name.
      */
     fun searchTors(query: String): List<Tor> {

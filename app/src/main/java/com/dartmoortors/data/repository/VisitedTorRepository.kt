@@ -77,6 +77,13 @@ class VisitedTorRepository @Inject constructor(
     }
     
     /**
+     * Get all visited tors as a one-time list (not Flow).
+     */
+    suspend fun getVisitedTorsOnce(checklistId: String = "default"): List<VisitedTor> {
+        return visitedTorDao.getVisitedTorsOnce(checklistId)
+    }
+    
+    /**
      * Get the count of visited tors.
      */
     fun getVisitedCount(checklistId: String = "default"): Flow<Int> {

@@ -20,44 +20,7 @@ fun PhotosScreen() {
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        // Dartmoor Tors Album section
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.PhotoAlbum,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Dartmoor Tors Album",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Create a dedicated album in your photo library to collect all your tor photos in one place.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                    onClick = { /* TODO: Create album */ },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Create Album")
-                }
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Auto-match section
+        // Main explanation
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -70,31 +33,33 @@ fun PhotosScreen() {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Find Photos Near Tors",
+                        text = "Photos",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Scan your photo library to find photos taken near tors. Photos with GPS coordinates within 100m of a tor will be suggested for association.",
+                    text = "Add photos to tors you've visited to create a visual record of your Dartmoor adventures.",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                    onClick = { /* TODO: Start scan */ },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(Icons.Default.Search, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Scan Photo Library")
-                }
+                Text(
+                    text = "To add a photo to a tor:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "1. Tap on a tor marker on the map\n2. Mark the tor as visited (if not already)\n3. Tap \"Add Photo\" to select a photo from your library",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Bag Tors Together section (placeholder)
+        // Platform limitation notice
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
@@ -104,13 +69,13 @@ fun PhotosScreen() {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        Icons.Default.Group,
+                        Icons.Default.Info,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Bag Tors Together",
+                        text = "Android Limitations",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -118,37 +83,9 @@ fun PhotosScreen() {
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Link a shared album to track which tor photos you've shared with others. Create your Dartmoor Tors album first to unlock this feature.",
+                    text = "Some photo features available on iOS are not available on Android due to Google Photos privacy restrictions:\n\n• Photo map layer (auto-scan)\n• Auto-match photos to tors\n• Shared album integration\n\nGoogle Photos does not allow apps to programmatically access photo locations. You can still manually add photos to visited tors using the photo picker.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Photos on map info
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Map,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Photos on Map",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "You can show photos from your library on the map. Use the layers button on the Map tab to enable the photos layer.",
-                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
