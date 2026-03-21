@@ -10,8 +10,10 @@ Native map view following platform map guidelines. This is the primary view of t
 ## Requirements
 
 ### Map Markers
-Icons showing the locations of tors on a map. 
+
+Icons showing the locations of tors on a map.
 Each icon:
+
 - Is selectable to open place card
 - Shows visited and access state via colour:
   - **Green**: Visited
@@ -23,11 +25,13 @@ Future: We may have two types of icon, one zoomed out with less info so we can s
 ### Map Base Layers
 
 **[iOS]** Apple MapKit:
+
 - Standard (road map)
 - Satellite
 - Hybrid
 
 **[Android]** Google Maps SDK:
+
 - Normal (road map)
 - Satellite
 - Hybrid
@@ -36,7 +40,9 @@ Future: We may have two types of icon, one zoomed out with less info so we can s
 Future: OS Maps (https://osdatahub.os.uk/plans), OpenStreetMap
 
 ### Photos Layer
+
 Toggle to show photos from user's library as purple pins on the map:
+
 - Photos with GPS coordinates within Dartmoor bounds appear as markers
 - Tapping a photo pin shows preview with nearby tors (within 100m)
 - User can associate photo with a tor from the preview
@@ -50,6 +56,7 @@ Toolbar buttons for location and map style in navigation bar.
 ### Place Card Sheet
 
 When a tor is selected (from map marker or from search tab):
+
 - Appears as a sheet with detents: compact (220pt), medium, large
 - Contains: tor details, mark visited button, directions, links, photo
 - Background interaction enabled through medium detent (map remains interactive)
@@ -57,10 +64,12 @@ When a tor is selected (from map marker or from search tab):
 - **Map Positioning**: When navigating to a tor from search, the tor is positioned 1/4 down from the top of the screen, centering it in the visible map area above the card
 
 **[Platform-specific]** Sheet behaviour:
+
 - **[iOS]** Uses native sheet presentation with detents
 - **[Android]** Use BottomSheetBehavior with similar peek heights
 
 ### My Location Button
+
 - Button to pan/zoom map to user's current location
 - Uses standard location arrow icon
   - **[iOS]** `location.fill` SF Symbol
@@ -71,6 +80,7 @@ When a tor is selected (from map marker or from search tab):
 - User is free to pan the map after centering
 
 ### Compass Tracking Button
+
 - Only visible when location permission is granted
 - Positioned below the My Location button
 - Uses compass icon
@@ -83,6 +93,7 @@ When a tor is selected (from map marker or from search tab):
   - If user pans or zooms while tracking, tracking is automatically disabled
 
 ### Compass Line of Sight Button
+
 - Only visible when location permission is granted
 - Positioned above the My Location button in the bottom-right controls
 - Uses directional icon
@@ -99,6 +110,7 @@ When a tor is selected (from map marker or from search tab):
 - Use case: Helps users identify a distant tor by aligning their phone toward it and seeing what tors the line passes through
 
 ### Map Compass
+
 - Built-in map compass control
 - Automatically appears when map is rotated away from north
 - Tapping it resets map to north orientation
