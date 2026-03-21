@@ -135,7 +135,7 @@ class PreferencesRepository @Inject constructor(
             }
         }
         .map { preferences ->
-            preferences[PreferencesKeys.MAP_TYPE] ?: 0
+            preferences[PreferencesKeys.MAP_TYPE] ?: 3  // Default to Hybrid
         }
     
     /**

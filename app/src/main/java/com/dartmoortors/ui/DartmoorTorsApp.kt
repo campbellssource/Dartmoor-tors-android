@@ -43,6 +43,9 @@ fun DartmoorTorsApp() {
                         label = { Text(screen.title) },
                         selected = selected,
                         onClick = {
+                            if (screen.route == Screen.Map.route) {
+                                mapViewModel.resetToDefaultView()
+                            }
                             navController.navigate(screen.route) {
                                 // Pop up to the start destination of the graph to
                                 // avoid building up a large stack of destinations

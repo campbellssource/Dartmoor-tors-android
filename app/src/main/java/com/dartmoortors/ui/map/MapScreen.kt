@@ -42,6 +42,7 @@ import com.dartmoortors.ui.theme.Purple
 import com.dartmoortors.ui.theme.Teal
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.max
 
 private const val TAG = "MapScreen"
 
@@ -61,12 +62,12 @@ fun MapScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
     
-    // Photos layer state - disabled on Android (Google Photos doesn't expose GPS metadata)
-    // val showPhotosLayer by viewModel.showPhotosLayer.collectAsState()
-    // val mapPhotos by viewModel.mapPhotos.collectAsState()
-    // val selectedPhoto by viewModel.selectedPhoto.collectAsState()
-    // val nearbyTorsForPhoto by viewModel.nearbyTorsForPhoto.collectAsState()
-    // val isLoadingPhotos by viewModel.isLoadingPhotos.collectAsState()
+    // Photos layer state (works with locally-stored photos only)
+    val showPhotosLayer by viewModel.showPhotosLayer.collectAsState()
+    val mapPhotos by viewModel.mapPhotos.collectAsState()
+    val selectedPhoto by viewModel.selectedPhoto.collectAsState()
+    val nearbyTorsForPhoto by viewModel.nearbyTorsForPhoto.collectAsState()
+    val isLoadingPhotos by viewModel.isLoadingPhotos.collectAsState()
     
     // Location state
     val currentLocation by viewModel.currentLocation.collectAsState()
@@ -74,8 +75,12 @@ fun MapScreen(
     val trackingMode by viewModel.trackingMode.collectAsState()
     val isLocationEnabled by viewModel.isLocationEnabled.collectAsState()
     
+    // Compass line of sight state
+    val showCompassLine by viewModel.showCompassLine.collectAsState()
+    
     // Permission state
     var hasLocationPermission by remember { mutableStateOf(viewModel.hasLocationPermission()) }
+    var hasPhotoPermission by remember { mutableStateOf(viewModel.hasPhotoPermission()) }
     
     // Permission launcher for location
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -88,7 +93,15 @@ fun MapScreen(
         }
     }
     
-    // Photo permission launcher disabled - photo layer not supported on Android
+    // Permission launcher for photos
+    val photoPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        hasPhotoPermission = granted
+        if (granted) {
+            viewModel.setShowPhotosLayer(true)
+        }
+    }
     
     // Start location tracking if permission already granted
     LaunchedEffect(hasLocationPermission) {
@@ -214,8 +227,35 @@ fun MapScreen(
                 )
             }
             
-            // Photo markers disabled on Android - Google Photos doesn't expose GPS metadata
-            // for programmatic scanning. Users can still add photos to tors manually.
+            // Compass line of sight
+            if (showCompassLine && currentLocation != null && hasLocationPermission) {
+                val userLatLng = LatLng(currentLocation!!.latitude, currentLocation!!.longitude)
+                val endPoint = viewModel.calculateCompassLineEndpoint(cameraPositionState.position.zoom)
+                endPoint?.let { end ->
+                    Polyline(
+                        points = listOf(userLatLng, end),
+                        color = Color.Red,
+                        width = 8f
+                    )
+                }
+            }
+            
+            // Photo markers (purple pins) - only shows locally stored photos
+            if (showPhotosLayer) {
+                mapPhotos.forEach { photo ->
+                    if (photo.latitude != null && photo.longitude != null) {
+                        Marker(
+                            state = MarkerState(position = LatLng(photo.latitude, photo.longitude)),
+                            title = photo.displayName ?: "Photo",
+                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET),
+                            onClick = {
+                                viewModel.selectPhoto(photo)
+                                true
+                            }
+                        )
+                    }
+                }
+            }
         }
         
         // Map controls
@@ -225,6 +265,14 @@ fun MapScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // Reset to Dartmoor overview button
+            FloatingActionButton(
+                onClick = { viewModel.resetToDefaultView() },
+                containerColor = MaterialTheme.colorScheme.surface
+            ) {
+                Icon(Icons.Default.ZoomOutMap, contentDescription = "Reset to Dartmoor")
+            }
+
             // Map type button
             var showMapTypeMenu by remember { mutableStateOf(false) }
             
@@ -260,48 +308,99 @@ fun MapScreen(
                         onClick = { viewModel.setMapType(3); showMapTypeMenu = false },
                         leadingIcon = { if (mapType == 3) Icon(Icons.Default.Check, null) }
                     )
-                    // Photo layer toggle disabled on Android - Google Photos doesn't expose
-                    // GPS metadata for programmatic library scanning
+                    HorizontalDivider()
+                    DropdownMenuItem(
+                        text = { Text("Show Photos") },
+                        onClick = { 
+                            if (showPhotosLayer) {
+                                viewModel.setShowPhotosLayer(false)
+                            } else {
+                                if (hasPhotoPermission) {
+                                    viewModel.setShowPhotosLayer(true)
+                                } else {
+                                    photoPermissionLauncher.launch(viewModel.getRequiredPhotoPermission())
+                                }
+                            }
+                            showMapTypeMenu = false
+                        },
+                        leadingIcon = { 
+                            if (showPhotosLayer) Icon(Icons.Default.Check, null, tint = Purple)
+                        },
+                        trailingIcon = {
+                            Icon(
+                                Icons.Default.PhotoLibrary, 
+                                contentDescription = null,
+                                tint = if (showPhotosLayer) Purple else LocalContentColor.current
+                            )
+                        }
+                    )
                 }
             }
         }
         
-        // My location button
-        FloatingActionButton(
-            onClick = {
-                if (hasLocationPermission) {
-                    viewModel.cycleTrackingMode()
-                } else {
-                    permissionLauncher.launch(
-                        arrayOf(
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                        )
-                    )
-                }
-            },
+        // Bottom-right control buttons column
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
-            containerColor = when (trackingMode) {
-                TrackingMode.NONE -> MaterialTheme.colorScheme.surface
-                TrackingMode.FOLLOW -> MaterialTheme.colorScheme.primaryContainer
-                TrackingMode.FOLLOW_COMPASS -> MaterialTheme.colorScheme.primary
-            }
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(
-                imageVector = when (trackingMode) {
-                    TrackingMode.NONE -> Icons.Default.MyLocation
-                    TrackingMode.FOLLOW -> Icons.Default.MyLocation
-                    TrackingMode.FOLLOW_COMPASS -> Icons.Default.Explore
-                },
-                contentDescription = "My Location",
-                tint = when (trackingMode) {
-                    TrackingMode.NONE -> MaterialTheme.colorScheme.onSurface
-                    TrackingMode.FOLLOW -> MaterialTheme.colorScheme.onPrimaryContainer
-                    TrackingMode.FOLLOW_COMPASS -> MaterialTheme.colorScheme.onPrimary
+            // Compass line of sight button (only visible when location permission granted)
+            if (hasLocationPermission) {
+                FloatingActionButton(
+                    onClick = { viewModel.toggleCompassLine() },
+                    containerColor = if (showCompassLine) {
+                        MaterialTheme.colorScheme.errorContainer
+                    } else {
+                        MaterialTheme.colorScheme.surface
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.NearMe,
+                        contentDescription = "Compass Line of Sight",
+                        tint = if (showCompassLine) {
+                            MaterialTheme.colorScheme.onErrorContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        }
+                    )
                 }
-            )
+            }
+            
+            // My location button
+            FloatingActionButton(
+                onClick = {
+                    if (hasLocationPermission) {
+                        viewModel.cycleTrackingMode()
+                    } else {
+                        permissionLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            )
+                        )
+                    }
+                },
+                containerColor = when (trackingMode) {
+                    TrackingMode.NONE -> MaterialTheme.colorScheme.surface
+                    TrackingMode.FOLLOW -> MaterialTheme.colorScheme.primaryContainer
+                    TrackingMode.FOLLOW_COMPASS -> MaterialTheme.colorScheme.primary
+                }
+            ) {
+                Icon(
+                    imageVector = when (trackingMode) {
+                        TrackingMode.NONE -> Icons.Default.MyLocation
+                        TrackingMode.FOLLOW -> Icons.Default.MyLocation
+                        TrackingMode.FOLLOW_COMPASS -> Icons.Default.Explore
+                    },
+                    contentDescription = "My Location",
+                    tint = when (trackingMode) {
+                        TrackingMode.NONE -> MaterialTheme.colorScheme.onSurface
+                        TrackingMode.FOLLOW -> MaterialTheme.colorScheme.onPrimaryContainer
+                        TrackingMode.FOLLOW_COMPASS -> MaterialTheme.colorScheme.onPrimary
+                    }
+                )
+            }
         }
         
         // Loading indicator
@@ -346,9 +445,146 @@ fun MapScreen(
             }
         }
         
-        // Photo preview bottom sheet - disabled on Android (photo layer not supported)
+        // Photo preview bottom sheet
+        selectedPhoto?.let { photo ->
+            val photoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+            ModalBottomSheet(
+                onDismissRequest = { viewModel.deselectPhoto() },
+                sheetState = photoSheetState
+            ) {
+                PhotoPreviewSheet(
+                    photo = photo,
+                    nearbyTors = nearbyTorsForPhoto,
+                    onTorSelected = { torId -> viewModel.associatePhotoWithTor(photo, torId) },
+                    onDismiss = { viewModel.deselectPhoto() }
+                )
+            }
+        }
     }
 }
 
-// PhotoPreviewSheet and NearbyTorItem removed - photo layer not supported on Android
-// Google Photos does not expose GPS metadata for programmatic library scanning
+/**
+ * Bottom sheet showing a photo preview with nearby tors to associate.
+ */
+@Composable
+private fun PhotoPreviewSheet(
+    photo: Photo,
+    nearbyTors: List<TorWithDistance>,
+    onTorSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    val dateFormatter = remember { SimpleDateFormat("d MMMM yyyy, HH:mm", Locale.getDefault()) }
+    
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 24.dp)
+    ) {
+        // Photo preview
+        AsyncImage(
+            model = ImageRequest.Builder(context)
+                .data(photo.uri)
+                .crossfade(true)
+                .build(),
+            contentDescription = "Photo preview",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .clip(MaterialTheme.shapes.medium),
+            contentScale = ContentScale.Crop
+        )
+        
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        // Photo date
+        Text(
+            text = dateFormatter.format(Date(photo.dateTaken)),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Nearby tors section
+        if (nearbyTors.isEmpty()) {
+            Text(
+                text = "No tors within 100m of this photo",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            Text(
+                text = "Nearby tors",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            LazyColumn(
+                modifier = Modifier.heightIn(max = 200.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                items(nearbyTors) { torWithDistance ->
+                    NearbyTorItem(
+                        torWithDistance = torWithDistance,
+                        onClick = { onTorSelected(torWithDistance.tor.id) }
+                    )
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Cancel button
+        OutlinedButton(
+            onClick = onDismiss,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Cancel")
+        }
+    }
+}
+
+/**
+ * List item for a nearby tor in the photo preview sheet.
+ */
+@Composable
+private fun NearbyTorItem(
+    torWithDistance: TorWithDistance,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = torWithDistance.tor.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = "${torWithDistance.distanceMeters.toInt()}m away • ${torWithDistance.tor.heightMeters}m",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            Icon(
+                Icons.Default.Add,
+                contentDescription = "Associate with this tor",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}

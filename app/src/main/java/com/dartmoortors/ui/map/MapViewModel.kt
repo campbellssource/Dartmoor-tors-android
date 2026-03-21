@@ -73,6 +73,10 @@ class MapViewModel @Inject constructor(
     private val _trackingMode = MutableStateFlow(TrackingMode.NONE)
     val trackingMode: StateFlow<TrackingMode> = _trackingMode.asStateFlow()
     
+    // Compass line of sight
+    private val _showCompassLine = MutableStateFlow(false)
+    val showCompassLine: StateFlow<Boolean> = _showCompassLine.asStateFlow()
+    
     // Photos for map layer
     private val _mapPhotos = MutableStateFlow<List<Photo>>(emptyList())
     val mapPhotos: StateFlow<List<Photo>> = _mapPhotos.asStateFlow()
@@ -109,7 +113,7 @@ class MapViewModel @Inject constructor(
     
     val mapType: StateFlow<Int> = preferencesRepository
         .mapType
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 3)  // Default to Hybrid
     
     val showPhotosLayer: StateFlow<Boolean> = preferencesRepository
         .showPhotosLayer
@@ -424,6 +428,69 @@ class MapViewModel @Inject constructor(
         }
     }
     
+    /**
+     * Reset camera to default Dartmoor overview and disable location tracking.
+     */
+    fun resetToDefaultView() {
+        _trackingMode.value = TrackingMode.NONE
+        _cameraTarget.value = DARTMOOR_CENTER
+        _cameraZoom.value = DEFAULT_ZOOM
+    }
+    
+    /**
+     * Toggle the compass line of sight visibility.
+     */
+    fun toggleCompassLine() {
+        _showCompassLine.value = !_showCompassLine.value
+    }
+    
+    /**
+     * Calculate the endpoint of the compass line based on current location, heading, and zoom.
+     * Line length scales with zoom level - longer at lower zoom (farther view).
+     * 
+     * @param zoomLevel Current camera zoom level
+     * @return The destination LatLng or null if location is not available
+     */
+    fun calculateCompassLineEndpoint(zoomLevel: Float): LatLng? {
+        val location = currentLocation.value ?: return null
+        val heading = compassHeading.value
+        
+        // Calculate line length based on zoom level
+        // At zoom 15 (close): ~500m, zoom 11 (default): ~5km, zoom 8 (far): ~20km
+        val baseDistance = 500.0 // meters at zoom 15
+        val zoomFactor = Math.pow(2.0, (15 - zoomLevel).toDouble())
+        val distanceMeters = baseDistance * zoomFactor
+        
+        // Convert heading to radians
+        val bearingRadians = Math.toRadians(heading.toDouble())
+        
+        // Earth's radius in meters
+        val earthRadius = 6371000.0
+        
+        // Convert start lat/lon to radians
+        val lat1 = Math.toRadians(location.latitude)
+        val lon1 = Math.toRadians(location.longitude)
+        
+        // Calculate destination point using haversine formula
+        val angularDistance = distanceMeters / earthRadius
+        
+        val lat2 = Math.asin(
+            Math.sin(lat1) * Math.cos(angularDistance) +
+            Math.cos(lat1) * Math.sin(angularDistance) * Math.cos(bearingRadians)
+        )
+        
+        val lon2 = lon1 + Math.atan2(
+            Math.sin(bearingRadians) * Math.sin(angularDistance) * Math.cos(lat1),
+            Math.cos(angularDistance) - Math.sin(lat1) * Math.sin(lat2)
+        )
+        
+        // Convert back to degrees
+        return LatLng(
+            Math.toDegrees(lat2),
+            Math.toDegrees(lon2)
+        )
+    }
+
     /**
      * Move camera to current location.
      */

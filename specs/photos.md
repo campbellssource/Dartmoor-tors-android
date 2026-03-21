@@ -283,21 +283,21 @@ If a stored photo reference fails to load (e.g., due to identifier changes betwe
 
 ## Implementation Status
 
-| Feature                         | iOS            | Android                                        |
-| ------------------------------- | -------------- | ---------------------------------------------- |
-| Feature 1: Photos on Tor Detail | ✅ Implemented | ✅ Implemented (Photo Picker)                  |
-| Feature 2: Photos Layer on Map  | ✅ Implemented | ❌ Not possible (Google Photos API limitation) |
-| Feature 3: Auto-Match Photos    | ✅ Implemented | ❌ Not possible (Google Photos API limitation) |
-| Feature 4: Shared Album         | ✅ Implemented | ❌ Not possible (API removed March 2025)       |
-| Feature 5: Dartmoor Tors Album  | ✅ Implemented | ❌ Not possible (requires library access)      |
-| Feature 6: Location Fallback    | ✅ Implemented | ❌ Not possible (requires GPS access)          |
+| Feature                         | iOS            | Android                                                  |
+| ------------------------------- | -------------- | -------------------------------------------------------- |
+| Feature 1: Photos on Tor Detail | ✅ Implemented | ✅ Implemented (Photo Picker)                            |
+| Feature 2: Photos Layer on Map  | ✅ Implemented | ✅ Implemented (local photos only)                       |
+| Feature 3: Auto-Match Photos    | ✅ Implemented | ✅ Implemented (local photos only)                       |
+| Feature 4: Shared Album         | ✅ Implemented | ❌ Not possible (API removed March 2025)                 |
+| Feature 5: Dartmoor Tors Album  | ✅ Implemented | ❌ Not implemented                                       |
+| Feature 6: Location Fallback    | ✅ Implemented | ✅ Implemented (local photos only)                       |
 
-### Android Limitations
+### Android Notes
 
-As of March 2025, Google removed the `photoslibrary.readonly`, `photoslibrary.sharing`, and `photoslibrary` scopes from the Google Photos Library API. Apps can no longer:
+The photo features on Android work with **locally-stored photos only**. Photos that are backed up to Google Photos but not downloaded to the device will not appear on the map layer.
 
-- Programmatically scan a user's photo library
-- Access GPS/location metadata from photos
-- Manage shared albums
+This is because Android's MediaStore API only has access to photos physically stored on the device. Cloud-only photos (synced via Google Photos) are not accessible programmatically.
 
-The **Google Photos Picker API** still allows users to manually select photos, but does not provide location data. This means Android users can add photos to visited tors using the Photo Picker, but cannot use features that require scanning the library for nearby photos.
+To use the photo map layer effectively, users should:
+- Take photos directly with their device camera (stored locally by default)
+- Or download specific photos from Google Photos to local storage

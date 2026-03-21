@@ -82,6 +82,22 @@ When a tor is selected (from map marker or from search tab):
   - Second tap: Disables tracking and resets map to north orientation
   - If user pans or zooms while tracking, tracking is automatically disabled
 
+### Compass Line of Sight Button
+- Only visible when location permission is granted
+- Positioned above the My Location button in the bottom-right controls
+- Uses directional icon
+  - **[Android]** `near_me` Material icon
+- Button turns red/highlighted when line is active
+- Behaviour:
+  - Tap: Toggles visibility of a compass line on the map
+  - When active, draws a red line from the user's location in the direction the device's compass is pointing
+  - Line length scales with zoom level:
+    - Closer zoom (15): ~500m line
+    - Default zoom (11): ~5km line
+    - Farther zoom (8): ~20km line
+  - Line updates in real-time as the user rotates their device
+- Use case: Helps users identify a distant tor by aligning their phone toward it and seeing what tors the line passes through
+
 ### Map Compass
 - Built-in map compass control
 - Automatically appears when map is rotated away from north
