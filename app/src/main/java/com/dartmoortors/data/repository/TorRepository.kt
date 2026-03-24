@@ -28,6 +28,9 @@ class TorRepository @Inject constructor(
     private val _tors = MutableStateFlow<List<Tor>>(emptyList())
     val tors: StateFlow<List<Tor>> = _tors.asStateFlow()
     
+    // Cached map for O(1) lookup by ID
+    private var _torsById: Map<String, Tor> = emptyMap()
+    
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
     
@@ -60,6 +63,7 @@ class TorRepository @Inject constructor(
                     Log.d(TAG, "First tor: ${torList.first()}")
                 }
                 _tors.value = torList
+                _torsById = torList.associateBy { it.id }
                 isLoaded = true
                 Log.d(TAG, "Tors loaded successfully")
             } catch (e: Exception) {
@@ -72,10 +76,10 @@ class TorRepository @Inject constructor(
     }
     
     /**
-     * Get a tor by ID.
+     * Get a tor by ID. O(1) lookup using cached map.
      */
     fun getTorById(id: String): Tor? {
-        return _tors.value.find { it.id == id }
+        return _torsById[id]
     }
     
     /**

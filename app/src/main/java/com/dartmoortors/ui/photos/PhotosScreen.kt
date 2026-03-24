@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.dartmoortors.data.model.Photo
 import com.dartmoortors.data.model.PhotoScanResult
@@ -337,7 +338,10 @@ private fun ReviewingView(
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(photo.uri)
+                    .size(1200, 1200) // Larger size for full-screen viewing
                     .crossfade(true)
+                    .diskCachePolicy(CachePolicy.ENABLED)
+                    .memoryCachePolicy(CachePolicy.ENABLED)
                     .build(),
                 contentDescription = "Photo near ${result.torName}",
                 modifier = Modifier

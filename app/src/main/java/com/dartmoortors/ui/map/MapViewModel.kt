@@ -33,6 +33,7 @@ enum class TrackingMode {
 /**
  * ViewModel for the Map screen.
  */
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val torRepository: TorRepository,
@@ -153,14 +154,13 @@ class MapViewModel @Inject constructor(
             if (!tor.isInCollection(collectionId)) return@filter false
             
             // Only apply classification filter if collection has sub-filters
+            // Use cached enum properties for performance
             if (hasSubFilters) {
-                val classification = Classification.fromString(tor.classification)
-                if (!inputs.classifications.contains(classification)) return@filter false
+                if (!inputs.classifications.contains(tor.classificationEnum)) return@filter false
             }
             
-            // Apply access filter
-            val access = Access.fromString(tor.access)
-            if (inputs.accessibleOnly && !access.isAccessible) return@filter false
+            // Apply access filter using cached property
+            if (inputs.accessibleOnly && !tor.isAccessible) return@filter false
             
             true
         }.map { tor ->
@@ -173,25 +173,37 @@ class MapViewModel @Inject constructor(
         }
         Log.d(TAG, "Filtered tors result: ${filtered.size}")
         filtered
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    }
+    .distinctUntilChanged()
+    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    /**
+     * Map markers as ClusterItems for efficient rendering.
+     */
+    val clusterItems: StateFlow<List<TorClusterItem>> = filteredTors
+        .map { tors -> tors.map { TorClusterItem(it) } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     
     /**
      * Currently selected tor with visit state.
+     * Uses O(1) map lookups and direct observation for fast response.
      */
-    val selectedTor: StateFlow<TorWithVisitState?> = combine(
-        _selectedTorId,
-        torRepository.tors,
-        visitedTorRepository.getVisitedTors()
-    ) { selectedId, tors, visitedTors ->
-        selectedId?.let { id ->
-            tors.find { it.id == id }?.let { tor ->
-                TorWithVisitState(
-                    tor = tor,
-                    visitedTor = visitedTors.find { it.torId == id }
-                )
+    val selectedTor: StateFlow<TorWithVisitState?> = _selectedTorId
+        .flatMapLatest { selectedId ->
+            if (selectedId == null) {
+                flowOf(null)
+            } else {
+                val tor = torRepository.getTorById(selectedId)
+                if (tor == null) {
+                    flowOf(null)
+                } else {
+                    visitedTorRepository.observeVisitedTor(selectedId).map { visitedTor ->
+                        TorWithVisitState(tor = tor, visitedTor = visitedTor)
+                    }
+                }
             }
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
     
     init {
         viewModelScope.launch {
@@ -294,11 +306,13 @@ class MapViewModel @Inject constructor(
      * Select a tor to show in the detail sheet.
      */
     fun selectTor(torId: String) {
+        Log.d(TAG, "selectTor called: $torId")
         _selectedTorId.value = torId
         torRepository.getTorById(torId)?.let { tor ->
             _cameraTarget.value = LatLng(tor.latitude, tor.longitude)
             _cameraZoom.value = DETAIL_ZOOM
         }
+        Log.d(TAG, "selectTor completed: $torId")
     }
     
     /**

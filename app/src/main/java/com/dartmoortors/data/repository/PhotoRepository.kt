@@ -5,7 +5,6 @@ import com.dartmoortors.data.model.Photo
 import com.dartmoortors.data.model.PhotoScanResult
 import com.dartmoortors.data.model.Tor
 import com.dartmoortors.service.PhotoService
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
@@ -41,14 +40,15 @@ class PhotoRepository @Inject constructor(
     /**
      * Find nearby tors for a photo to potentially associate with.
      */
-    suspend fun findTorsNearPhoto(photo: Photo): List<TorWithDistance> {
-        if (!photo.hasLocation) return emptyList()
+    fun findTorsNearPhoto(photo: Photo): List<TorWithDistance> {
+        val lat = photo.latitude ?: return emptyList()
+        val lon = photo.longitude ?: return emptyList()
         
         val allTors = torRepository.getAllTors()
         return allTors.mapNotNull { tor ->
             val distance = photoService.calculateDistance(
-                photo.latitude!!,
-                photo.longitude!!,
+                lat,
+                lon,
                 tor.latitude,
                 tor.longitude
             )
@@ -65,7 +65,6 @@ class PhotoRepository @Inject constructor(
     suspend fun scanForTorMatches(): List<PhotoScanResult> {
         val results = mutableMapOf<String, MutableList<PhotoWithDistance>>()
         val allTors = torRepository.getAllTors()
-        val visitedTorIds = visitedTorRepository.getVisitedTorsOnce().map { it.torId }.toSet()
         
         // Get tors that don't already have photos
         val torsWithoutPhotos = allTors.filter { tor ->
@@ -79,20 +78,23 @@ class PhotoRepository @Inject constructor(
         _scanProgress.value = ScanProgress(0, totalPhotos, 0)
         
         photos.forEachIndexed { index, photo ->
-            if (!photo.hasLocation) return@forEachIndexed
+            val pLat = photo.latitude
+            val pLon = photo.longitude
             
-            // Find tors near this photo
-            torsWithoutPhotos.forEach { tor ->
-                val distance = photoService.calculateDistance(
-                    photo.latitude!!,
-                    photo.longitude!!,
-                    tor.latitude,
-                    tor.longitude
-                )
-                
-                if (distance <= MATCH_RADIUS_METERS) {
-                    results.getOrPut(tor.id) { mutableListOf() }
-                        .add(PhotoWithDistance(photo, distance))
+            if (pLat != null && pLon != null) {
+                // Find tors near this photo
+                torsWithoutPhotos.forEach { tor ->
+                    val distance = photoService.calculateDistance(
+                        pLat,
+                        pLon,
+                        tor.latitude,
+                        tor.longitude
+                    )
+                    
+                    if (distance <= MATCH_RADIUS_METERS) {
+                        results.getOrPut(tor.id) { mutableListOf() }
+                            .add(PhotoWithDistance(photo, distance))
+                    }
                 }
             }
             
@@ -176,7 +178,6 @@ data class ScanProgress(
     val matchesFound: Int
 ) {
     val progress: Float get() = if (totalPhotos > 0) photosScanned.toFloat() / totalPhotos else 0f
-    val isComplete: Boolean get() = photosScanned >= totalPhotos
 }
 
 /**

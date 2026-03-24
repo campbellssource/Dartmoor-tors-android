@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.dartmoortors.data.model.Access
 import com.dartmoortors.data.model.TorWithVisitState
@@ -85,7 +86,10 @@ fun TorDetailSheet(
                     AsyncImage(
                         model = ImageRequest.Builder(context)
                             .data(photoUri)
+                            .size(800, 400) // Target size for memory efficiency
                             .crossfade(true)
+                            .diskCachePolicy(CachePolicy.ENABLED)
+                            .memoryCachePolicy(CachePolicy.ENABLED)
                             .build(),
                         contentDescription = "Photo of ${tor.name}",
                         modifier = Modifier.fillMaxSize(),

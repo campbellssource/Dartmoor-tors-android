@@ -114,6 +114,7 @@ class LocationService @Inject constructor(
     
     /**
      * Start compass updates for device heading.
+     * Updates are throttled to reduce battery usage and main thread load.
      */
     fun startCompassUpdates() {
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -122,7 +123,12 @@ class LocationService @Inject constructor(
         if (accelerometer == null || magnetometer == null) return
         
         compassListener = object : SensorEventListener {
+            private var lastUpdateTime = 0L
+            private val updateIntervalMs = 100L // Throttle to 10 updates per second (was 60)
+            
             override fun onSensorChanged(event: SensorEvent) {
+                val currentTime = System.currentTimeMillis()
+                
                 when (event.sensor.type) {
                     Sensor.TYPE_ACCELEROMETER -> {
                         System.arraycopy(event.values, 0, accelerometerReading, 0, accelerometerReading.size)
@@ -131,6 +137,10 @@ class LocationService @Inject constructor(
                         System.arraycopy(event.values, 0, magnetometerReading, 0, magnetometerReading.size)
                     }
                 }
+                
+                // Throttle orientation calculation
+                if (currentTime - lastUpdateTime < updateIntervalMs) return
+                lastUpdateTime = currentTime
                 
                 // Calculate orientation
                 if (SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerReading, magnetometerReading)) {
@@ -148,7 +158,7 @@ class LocationService @Inject constructor(
         sensorManager.registerListener(
             compassListener,
             accelerometer,
-            SensorManager.SENSOR_DELAY_UI
+            SensorManager.SENSOR_DELAY_UI // Reduced from SENSOR_DELAY_GAME for better battery/performance
         )
         sensorManager.registerListener(
             compassListener,

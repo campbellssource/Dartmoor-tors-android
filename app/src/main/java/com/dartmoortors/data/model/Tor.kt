@@ -24,17 +24,25 @@ data class Tor(
     val wikipediaURL: String?,
     val collections: List<String> = emptyList()
 ) {
-    /**
-     * Returns the classification enum value.
-     */
-    val classificationEnum: Classification
-        get() = Classification.fromString(classification)
+    // Cached enum values - computed once per access, stored in transient fields
+    // Note: Can't use `by lazy` with Gson deserialization
+    @Transient
+    private var _classificationEnum: Classification? = null
+    
+    @Transient
+    private var _accessEnum: Access? = null
     
     /**
-     * Returns the access enum value.
+     * Returns the classification enum value (cached for performance).
+     */
+    val classificationEnum: Classification
+        get() = _classificationEnum ?: Classification.fromString(classification).also { _classificationEnum = it }
+    
+    /**
+     * Returns the access enum value (cached for performance).
      */
     val accessEnum: Access
-        get() = Access.fromString(access)
+        get() = _accessEnum ?: Access.fromString(access).also { _accessEnum = it }
     
     /**
      * Returns true if this tor is accessible (can be legally visited).

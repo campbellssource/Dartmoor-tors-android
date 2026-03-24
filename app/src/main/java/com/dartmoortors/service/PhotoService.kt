@@ -16,20 +16,13 @@ import com.dartmoortors.data.model.Photo
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val TAG = "PhotoService"
 
 /**
- * Service for accessing photos from the device's media library using MediaStore.
- * 
- * This service provides functionality for:
- * - Querying photos with location data
- * - Finding photos within geographic bounds (e.g., Dartmoor)
- * - Finding photos near specific coordinates
- * - Loading photo metadata
+ * Service for accessing photos from the device's media library.
  */
 @Singleton
 class PhotoService @Inject constructor(
@@ -44,144 +37,141 @@ class PhotoService @Inject constructor(
         const val DARTMOOR_MIN_LON = -4.15
         const val DARTMOOR_MAX_LON = -3.65
         
-        // Default limits
-        const val DEFAULT_PHOTO_LIMIT = 200
+        const val DEFAULT_PHOTO_LIMIT = 500
         const val DEFAULT_NEARBY_RADIUS_METERS = 100.0
     }
     
     /**
-     * Query all photos with GPS location data within Dartmoor bounds.
-     * Limited to [limit] photos for performance.
+     * Query photos with GPS location data within Dartmoor bounds.
      */
     suspend fun getPhotosInDartmoor(limit: Int = DEFAULT_PHOTO_LIMIT): List<Photo> = withContext(Dispatchers.IO) {
-        Log.d(TAG, "getPhotosInDartmoor: hasPermission=${hasPhotoPermission()}")
-        val allWithLocation = getPhotosWithLocation()
-        Log.d(TAG, "getPhotosInDartmoor: found ${allWithLocation.size} photos with location")
-        
-        val inBounds = allWithLocation.filter { photo ->
-            photo.latitude != null && photo.longitude != null &&
-            photo.latitude >= DARTMOOR_MIN_LAT && photo.latitude <= DARTMOOR_MAX_LAT &&
-            photo.longitude >= DARTMOOR_MIN_LON && photo.longitude <= DARTMOOR_MAX_LON
-        }
-        Log.d(TAG, "getPhotosInDartmoor: ${inBounds.size} photos within Dartmoor bounds")
-        
-        // Log some sample locations if we have photos but none in bounds
-        if (allWithLocation.isNotEmpty() && inBounds.isEmpty()) {
-            allWithLocation.take(5).forEach { photo ->
-                Log.d(TAG, "Sample photo location: lat=${photo.latitude}, lon=${photo.longitude}")
+        if (!hasPhotoPermission()) return@withContext emptyList()
+
+        val photos = mutableListOf<Photo>()
+        val projection = arrayOf(
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.DISPLAY_NAME,
+            MediaStore.Images.Media.DATE_TAKEN
+        )
+
+        val selection = "${MediaStore.Images.Media.MIME_TYPE} LIKE ?"
+        val selectionArgs = arrayOf("image/%")
+        val sortOrder = "${MediaStore.Images.Media.DATE_TAKEN} DESC"
+
+        try {
+            contentResolver.query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                sortOrder
+            )?.use { cursor ->
+                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+                val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
+                val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN)
+                
+                var count = 0
+                while (cursor.moveToNext() && count < limit) {
+                    val id = cursor.getLong(idColumn)
+                    val uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                    val location = getPhotoLocation(uri)
+                    
+                    if (location != null) {
+                        val (lat, lon) = location
+                        if (lat in DARTMOOR_MIN_LAT..DARTMOOR_MAX_LAT && 
+                            lon in DARTMOOR_MIN_LON..DARTMOOR_MAX_LON) {
+                            photos.add(
+                                Photo(
+                                    id = id,
+                                    uri = uri,
+                                    dateTaken = cursor.getLong(dateColumn),
+                                    latitude = lat,
+                                    longitude = lon,
+                                    displayName = cursor.getString(nameColumn)
+                                )
+                            )
+                            count++
+                        }
+                    }
+                }
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error querying Dartmoor photos", e)
         }
         
-        inBounds.take(limit)
+        photos
     }
-    
+
     /**
      * Query all photos with GPS location data.
-     * For features that need to scan the full library.
      */
     suspend fun getPhotosWithLocation(): List<Photo> = withContext(Dispatchers.IO) {
+        if (!hasPhotoPermission()) return@withContext emptyList()
+        
         val photos = mutableListOf<Photo>()
-        var totalPhotos = 0
-        var photosWithLocation = 0
-        
-        // Debug: Check total count of ALL images first
-        val countProjection = arrayOf(MediaStore.Images.Media._ID)
-        contentResolver.query(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            countProjection,
-            null,
-            null,
-            null
-        )?.use { cursor ->
-            Log.d(TAG, "DEBUG: Total images in EXTERNAL_CONTENT_URI: ${cursor.count}")
-        }
-        
-        // Also check INTERNAL
-        contentResolver.query(
-            MediaStore.Images.Media.INTERNAL_CONTENT_URI,
-            countProjection,
-            null,
-            null,
-            null
-        )?.use { cursor ->
-            Log.d(TAG, "DEBUG: Total images in INTERNAL_CONTENT_URI: ${cursor.count}")
-        }
-        
         val projection = arrayOf(
             MediaStore.Images.Media._ID,
             MediaStore.Images.Media.DISPLAY_NAME,
             MediaStore.Images.Media.DATE_TAKEN
         )
         
-        val sortOrder = "${MediaStore.Images.Media.DATE_TAKEN} DESC"
-        
         try {
             contentResolver.query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 projection,
-                null,
-                null,
-                sortOrder
+                null, null,
+                "${MediaStore.Images.Media.DATE_TAKEN} DESC"
             )?.use { cursor ->
-                Log.d(TAG, "getPhotosWithLocation: cursor has ${cursor.count} photos")
                 val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
                 val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
                 val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN)
                 
                 while (cursor.moveToNext()) {
-                    totalPhotos++
                     val id = cursor.getLong(idColumn)
-                    val name = cursor.getString(nameColumn)
-                    val dateTaken = cursor.getLong(dateColumn)
-                    
-                    val uri = ContentUris.withAppendedId(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        id
-                    )
-                    
-                    // Try to get location from EXIF
+                    val uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
                     val location = getPhotoLocation(uri)
                     
                     if (location != null) {
-                        photosWithLocation++
                         photos.add(
                             Photo(
                                 id = id,
                                 uri = uri,
-                                dateTaken = dateTaken,
+                                dateTaken = cursor.getLong(dateColumn),
                                 latitude = location.first,
                                 longitude = location.second,
-                                displayName = name
+                                displayName = cursor.getString(nameColumn)
                             )
                         )
                     }
                 }
-            } ?: Log.e(TAG, "getPhotosWithLocation: cursor is null!")
-            
-            Log.d(TAG, "getPhotosWithLocation: processed $totalPhotos photos, $photosWithLocation have location")
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "getPhotosWithLocation: error querying photos", e)
+            Log.e(TAG, "Error querying photos with location", e)
         }
-        
         photos
     }
-    
+
     /**
-     * Find photos near a specific location.
+     * Extracts location using ExifInterface.
      */
-    suspend fun getPhotosNearLocation(
-        latitude: Double,
-        longitude: Double,
-        radiusMeters: Double = DEFAULT_NEARBY_RADIUS_METERS
-    ): List<Photo> = withContext(Dispatchers.IO) {
-        getPhotosWithLocation().filter { photo ->
-            photo.latitude != null && photo.longitude != null &&
-            calculateDistance(latitude, longitude, photo.latitude, photo.longitude) <= radiusMeters
-        }.sortedBy { photo ->
-            calculateDistance(latitude, longitude, photo.latitude!!, photo.longitude!!)
+    private fun getPhotoLocation(uri: Uri): Pair<Double, Double>? {
+        return try {
+            val photoUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                MediaStore.setRequireOriginal(uri)
+            } else uri
+            
+            context.contentResolver.openInputStream(photoUri)?.use { stream ->
+                val exif = ExifInterface(stream)
+                val latLong = FloatArray(2)
+                if (exif.getLatLong(latLong)) {
+                    Pair(latLong[0].toDouble(), latLong[1].toDouble())
+                } else null
+            }
+        } catch (e: Exception) {
+            null
         }
     }
-    
+
     /**
      * Find the closest photo to a location within a radius.
      */
@@ -190,40 +180,17 @@ class PhotoService @Inject constructor(
         longitude: Double,
         radiusMeters: Double = DEFAULT_NEARBY_RADIUS_METERS
     ): Photo? {
-        return getPhotosNearLocation(latitude, longitude, radiusMeters).firstOrNull()
-    }
-    
-    /**
-     * Get photo information by URI.
-     */
-    suspend fun getPhotoByUri(uri: Uri): Photo? = withContext(Dispatchers.IO) {
-        val projection = arrayOf(
-            MediaStore.Images.Media._ID,
-            MediaStore.Images.Media.DISPLAY_NAME,
-            MediaStore.Images.Media.DATE_TAKEN
-        )
-        
-        contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID))
-                val name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME))
-                val dateTaken = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN))
-                val location = getPhotoLocation(uri)
-                
-                Photo(
-                    id = id,
-                    uri = uri,
-                    dateTaken = dateTaken,
-                    latitude = location?.first,
-                    longitude = location?.second,
-                    displayName = name
-                )
-            } else null
+        val photos = getPhotosWithLocation()
+        return photos.filter { photo ->
+            photo.latitude != null && photo.longitude != null &&
+            calculateDistance(latitude, longitude, photo.latitude, photo.longitude) <= radiusMeters
+        }.minByOrNull { photo ->
+            calculateDistance(latitude, longitude, photo.latitude!!, photo.longitude!!)
         }
     }
-    
+
     /**
-     * Check if a photo URI is still valid (not deleted).
+     * Check if a photo URI is still valid.
      */
     suspend fun isPhotoValid(uri: Uri): Boolean = withContext(Dispatchers.IO) {
         try {
@@ -234,100 +201,29 @@ class PhotoService @Inject constructor(
             false
         }
     }
-    
-    /**
-     * Extract GPS location from photo EXIF data.
-     * Requires ACCESS_MEDIA_LOCATION permission on Android 10+.
-     */
-    private var exifErrorCount = 0
-    private fun getPhotoLocation(uri: Uri): Pair<Double, Double>? {
-        return try {
-            val photoUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                MediaStore.setRequireOriginal(uri)
-            } else {
-                uri
-            }
-            
-            contentResolver.openInputStream(photoUri)?.use { inputStream ->
-                val exif = ExifInterface(inputStream)
-                val latLong = FloatArray(2)
-                if (exif.getLatLong(latLong)) {
-                    Pair(latLong[0].toDouble(), latLong[1].toDouble())
-                } else null
-            }
-        } catch (e: Exception) {
-            // Photo might not have EXIF data or location permission denied
-            exifErrorCount++
-            if (exifErrorCount <= 3) {
-                Log.w(TAG, "getPhotoLocation failed for $uri: ${e.message}")
-            } else if (exifErrorCount == 4) {
-                Log.w(TAG, "getPhotoLocation: suppressing further error logs...")
-            }
-            null
-        }
-    }
-    
-    /**
-     * Calculate distance between two GPS coordinates in meters.
-     */
-    fun calculateDistance(
-        lat1: Double, lon1: Double,
-        lat2: Double, lon2: Double
-    ): Double {
+
+    fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
         val results = FloatArray(1)
         Location.distanceBetween(lat1, lon1, lat2, lon2, results)
         return results[0].toDouble()
     }
-    
-    /**
-     * Check if the app has permission to read photos.
-     */
+
     fun hasPhotoPermission(): Boolean {
-        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.READ_MEDIA_IMAGES
-            ) == PackageManager.PERMISSION_GRANTED
+        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_IMAGES
         } else {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED
+            Manifest.permission.READ_EXTERNAL_STORAGE
         }
         
-        // Check for partial access on Android 14+
-        val hasPartialAccess = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
-            ) == PackageManager.PERMISSION_GRANTED
+        val hasFull = ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+        
+        val hasPartial = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED) == PackageManager.PERMISSION_GRANTED
         } else false
         
-        Log.d(TAG, "hasPhotoPermission: full=$hasPermission, partial=$hasPartialAccess, SDK=${Build.VERSION.SDK_INT}")
-        
-        return hasPermission || hasPartialAccess
+        return hasFull || hasPartial
     }
-    
-    /**
-     * Check if we have FULL photo access (not just partial/selected).
-     */
-    fun hasFullPhotoAccess(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.READ_MEDIA_IMAGES
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED
-        }
-    }
-    
-    /**
-     * Get the permission string needed for this device's API level.
-     */
+
     fun getRequiredPhotoPermission(): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Manifest.permission.READ_MEDIA_IMAGES

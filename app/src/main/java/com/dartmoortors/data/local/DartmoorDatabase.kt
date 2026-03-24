@@ -7,7 +7,7 @@ import com.dartmoortors.data.model.Checklist
 
 @Database(
     entities = [VisitedTor::class, Checklist::class],
-    version = 1,
+    version = 3,
     exportSchema = false
 )
 abstract class DartmoorDatabase : RoomDatabase() {

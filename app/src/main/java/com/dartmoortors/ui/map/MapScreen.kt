@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,14 +22,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
+import com.google.maps.android.compose.clustering.Clustering
 import com.dartmoortors.data.model.Access
 import com.dartmoortors.data.model.Photo
 import com.dartmoortors.data.model.TorWithVisitState
@@ -53,7 +58,7 @@ fun MapScreen(
     onTorSelected: (String) -> Unit
 ) {
     val context = LocalContext.current
-    val filteredTors by viewModel.filteredTors.collectAsState()
+    val clusterItems by viewModel.clusterItems.collectAsState()
     val selectedTor by viewModel.selectedTor.collectAsState()
     val showWelcome by viewModel.showWelcome.collectAsState()
     val mapType by viewModel.mapType.collectAsState()
@@ -62,7 +67,7 @@ fun MapScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
     
-    // Photos layer state (works with locally-stored photos only)
+    // Photos layer state
     val showPhotosLayer by viewModel.showPhotosLayer.collectAsState()
     val mapPhotos by viewModel.mapPhotos.collectAsState()
     val selectedPhoto by viewModel.selectedPhoto.collectAsState()
@@ -82,7 +87,6 @@ fun MapScreen(
     var hasLocationPermission by remember { mutableStateOf(viewModel.hasLocationPermission()) }
     var hasPhotoPermission by remember { mutableStateOf(viewModel.hasPhotoPermission()) }
     
-    // Permission launcher for location
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -93,7 +97,6 @@ fun MapScreen(
         }
     }
     
-    // Permission launcher for photos
     val photoPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -103,34 +106,22 @@ fun MapScreen(
         }
     }
     
-    // Start location tracking if permission already granted
     LaunchedEffect(hasLocationPermission) {
         if (hasLocationPermission) {
             viewModel.startLocationTracking()
         }
     }
     
-    // Log tor count for debugging
-    LaunchedEffect(filteredTors.size) {
-        Log.d(TAG, "MapScreen received ${filteredTors.size} filtered tors")
-    }
-    
-    // Map camera position
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(MapViewModel.DARTMOOR_CENTER, MapViewModel.DEFAULT_ZOOM)
     }
     
-    // Track if camera is being moved by user gesture
     var isUserMovingCamera by remember { mutableStateOf(false) }
     
-    // Detect when user starts moving the camera to disable tracking
     LaunchedEffect(cameraPositionState.isMoving) {
         if (cameraPositionState.isMoving) {
-            // When camera starts moving, if we're in tracking mode,
-            // assume user is interacting and will disable tracking after movement
             isUserMovingCamera = true
         } else {
-            // Camera stopped moving - if user was dragging, disable tracking
             if (isUserMovingCamera && trackingMode != TrackingMode.NONE) {
                 viewModel.onUserCameraMove()
             }
@@ -138,7 +129,6 @@ fun MapScreen(
         }
     }
     
-    // Animate to selected tor or location target
     LaunchedEffect(cameraTarget) {
         cameraTarget?.let { target ->
             cameraPositionState.animate(
@@ -149,7 +139,6 @@ fun MapScreen(
         }
     }
     
-    // Follow mode - update camera when location changes
     LaunchedEffect(currentLocation, trackingMode) {
         if (trackingMode == TrackingMode.FOLLOW && currentLocation != null && !isUserMovingCamera) {
             val location = currentLocation!!
@@ -160,7 +149,6 @@ fun MapScreen(
         }
     }
     
-    // Compass tracking mode - update camera bearing with compass heading
     LaunchedEffect(compassHeading, trackingMode, currentLocation) {
         if (trackingMode == TrackingMode.FOLLOW_COMPASS && currentLocation != null && !isUserMovingCamera) {
             val location = currentLocation!!
@@ -168,7 +156,7 @@ fun MapScreen(
                 .target(LatLng(location.latitude, location.longitude))
                 .zoom(cameraPositionState.position.zoom)
                 .bearing(compassHeading)
-                .tilt(45f) // Add slight tilt for compass mode
+                .tilt(45f)
                 .build()
             cameraPositionState.animate(
                 CameraUpdateFactory.newCameraPosition(newPosition),
@@ -177,7 +165,6 @@ fun MapScreen(
         }
     }
     
-    // Map type conversion
     val googleMapType = when (mapType) {
         1 -> MapType.SATELLITE
         2 -> MapType.TERRAIN
@@ -185,11 +172,9 @@ fun MapScreen(
         else -> MapType.NORMAL
     }
     
-    // Bottom sheet state
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     
     Box(modifier = Modifier.fillMaxSize()) {
-        // Google Map
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
@@ -201,31 +186,59 @@ fun MapScreen(
                 zoomControlsEnabled = false,
                 myLocationButtonEnabled = false,
                 compassEnabled = true
-            ),
-            onMapLoaded = {
-                Log.d(TAG, "Map loaded")
-            }
+            )
         ) {
-            // Tor markers
-            filteredTors.forEach { torWithState ->
-                val tor = torWithState.tor
-                val markerColor = when {
-                    torWithState.isVisited -> BitmapDescriptorFactory.HUE_GREEN
-                    Access.fromString(tor.access).isAccessible -> BitmapDescriptorFactory.HUE_CYAN
-                    else -> BitmapDescriptorFactory.HUE_ORANGE
-                }
-                
-                Marker(
-                    state = MarkerState(position = LatLng(tor.latitude, tor.longitude)),
-                    title = tor.name,
-                    snippet = "${tor.heightMeters}m",
-                    icon = BitmapDescriptorFactory.defaultMarker(markerColor),
-                    onClick = {
-                        onTorSelected(tor.id)
-                        true
+            // OPTIMIZED: Marker Clustering
+            // This groups markers together when zoomed out, significantly improving panning performance.
+            Clustering(
+                items = clusterItems,
+                onClusterItemClick = { item ->
+                    onTorSelected(item.id)
+                    true
+                },
+                clusterContent = { cluster ->
+                    // Custom cluster appearance (Circle with count)
+                    Surface(
+                        modifier = Modifier.size(40.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        tonalElevation = 4.dp,
+                        shadowElevation = 4.dp
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = cluster.size.toString(),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
-                )
-            }
+                },
+                clusterItemContent = { item ->
+                    // Custom individual marker appearance
+                    val color = when {
+                        item.isVisited -> Green
+                        item.isAccessible -> Teal
+                        else -> Orange
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .background(color, CircleShape)
+                            .border(2.dp, Color.White, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Place,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = Color.White
+                        )
+                    }
+                }
+            )
             
             // Compass line of sight
             if (showCompassLine && currentLocation != null && hasLocationPermission) {
@@ -240,12 +253,12 @@ fun MapScreen(
                 }
             }
             
-            // Photo markers (purple pins) - only shows locally stored photos
+            // Photo markers (purple pins)
             if (showPhotosLayer) {
                 mapPhotos.forEach { photo ->
                     if (photo.latitude != null && photo.longitude != null) {
                         Marker(
-                            state = MarkerState(position = LatLng(photo.latitude, photo.longitude)),
+                            state = rememberMarkerState(key = photo.uri.toString(), position = LatLng(photo.latitude, photo.longitude)),
                             title = photo.displayName ?: "Photo",
                             icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET),
                             onClick = {
@@ -265,7 +278,6 @@ fun MapScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Reset to Dartmoor overview button
             FloatingActionButton(
                 onClick = { viewModel.resetToDefaultView() },
                 containerColor = MaterialTheme.colorScheme.surface
@@ -273,9 +285,7 @@ fun MapScreen(
                 Icon(Icons.Default.ZoomOutMap, contentDescription = "Reset to Dartmoor")
             }
 
-            // Map type button
             var showMapTypeMenu by remember { mutableStateOf(false) }
-            
             Box {
                 FloatingActionButton(
                     onClick = { showMapTypeMenu = true },
@@ -338,14 +348,12 @@ fun MapScreen(
             }
         }
         
-        // Bottom-right control buttons column
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Compass line of sight button (only visible when location permission granted)
             if (hasLocationPermission) {
                 FloatingActionButton(
                     onClick = { viewModel.toggleCompassLine() },
@@ -367,7 +375,6 @@ fun MapScreen(
                 }
             }
             
-            // My location button
             FloatingActionButton(
                 onClick = {
                     if (hasLocationPermission) {
@@ -403,14 +410,10 @@ fun MapScreen(
             }
         }
         
-        // Loading indicator
         if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
-            )
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
         
-        // Error message
         error?.let { errorMessage ->
             Snackbar(
                 modifier = Modifier
@@ -421,14 +424,10 @@ fun MapScreen(
             }
         }
         
-        // Welcome dialog
         if (showWelcome) {
-            WelcomeDialog(
-                onDismiss = { viewModel.dismissWelcome() }
-            )
+            WelcomeDialog(onDismiss = { viewModel.dismissWelcome() })
         }
         
-        // Tor detail bottom sheet
         selectedTor?.let { torWithState ->
             ModalBottomSheet(
                 onDismissRequest = { viewModel.deselectTor() },
@@ -445,7 +444,6 @@ fun MapScreen(
             }
         }
         
-        // Photo preview bottom sheet
         selectedPhoto?.let { photo ->
             val photoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
             ModalBottomSheet(
@@ -463,9 +461,6 @@ fun MapScreen(
     }
 }
 
-/**
- * Bottom sheet showing a photo preview with nearby tors to associate.
- */
 @Composable
 private fun PhotoPreviewSheet(
     photo: Photo,
@@ -482,11 +477,13 @@ private fun PhotoPreviewSheet(
             .padding(horizontal = 16.dp)
             .padding(bottom = 24.dp)
     ) {
-        // Photo preview
         AsyncImage(
             model = ImageRequest.Builder(context)
                 .data(photo.uri)
+                .size(600, 400)
                 .crossfade(true)
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .memoryCachePolicy(CachePolicy.ENABLED)
                 .build(),
             contentDescription = "Photo preview",
             modifier = Modifier
@@ -497,8 +494,6 @@ private fun PhotoPreviewSheet(
         )
         
         Spacer(modifier = Modifier.height(12.dp))
-        
-        // Photo date
         Text(
             text = dateFormatter.format(Date(photo.dateTaken)),
             style = MaterialTheme.typography.bodyMedium,
@@ -507,7 +502,6 @@ private fun PhotoPreviewSheet(
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Nearby tors section
         if (nearbyTors.isEmpty()) {
             Text(
                 text = "No tors within 100m of this photo",
@@ -520,9 +514,7 @@ private fun PhotoPreviewSheet(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-            
             Spacer(modifier = Modifier.height(8.dp))
-            
             LazyColumn(
                 modifier = Modifier.heightIn(max = 200.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -537,29 +529,18 @@ private fun PhotoPreviewSheet(
         }
         
         Spacer(modifier = Modifier.height(16.dp))
-        
-        // Cancel button
-        OutlinedButton(
-            onClick = onDismiss,
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        OutlinedButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
             Text("Cancel")
         }
     }
 }
 
-/**
- * List item for a nearby tor in the photo preview sheet.
- */
 @Composable
 private fun NearbyTorItem(
     torWithDistance: TorWithDistance,
     onClick: () -> Unit
 ) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -579,12 +560,7 @@ private fun NearbyTorItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            
-            Icon(
-                Icons.Default.Add,
-                contentDescription = "Associate with this tor",
-                tint = MaterialTheme.colorScheme.primary
-            )
+            Icon(Icons.Default.Add, contentDescription = "Associate", tint = MaterialTheme.colorScheme.primary)
         }
     }
 }

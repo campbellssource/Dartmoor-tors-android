@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -35,10 +36,17 @@ fun DartmoorTorsApp() {
                     val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
                     NavigationBarItem(
                         icon = {
-                            Icon(
-                                imageVector = if (selected) screen.selectedIcon else screen.unselectedIcon,
-                                contentDescription = screen.title
-                            )
+                            if (screen.iconRes != null) {
+                                Icon(
+                                    painter = painterResource(id = screen.iconRes),
+                                    contentDescription = screen.title
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = if (selected) screen.selectedIcon!! else screen.unselectedIcon!!,
+                                    contentDescription = screen.title
+                                )
+                            }
                         },
                         label = { Text(screen.title) },
                         selected = selected,

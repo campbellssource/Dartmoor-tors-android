@@ -14,15 +14,41 @@
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
 # Keep Tor data classes for Gson
--keep class uk.co.dartmoortors.data.model.** { *; }
+-keep class com.dartmoortors.data.model.** { *; }
 
 # Hilt
 -keep class dagger.hilt.** { *; }
 -keep class javax.inject.** { *; }
+
+# Room
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class *
+-keepclassmembers class * {
+    @androidx.room.* <methods>;
+}
+
+# Gson
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+
+# Google Maps
+-keep class com.google.android.gms.maps.** { *; }
+-keep class com.google.maps.android.** { *; }
+
+# Kotlin serialization (if used)
+-keepattributes RuntimeVisibleAnnotations,RuntimeVisibleParameterAnnotations
+
+# Keep enums
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}

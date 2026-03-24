@@ -1,5 +1,6 @@
 package com.dartmoortors.ui.navigation
 
+import androidx.annotation.DrawableRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.PhotoLibrary
@@ -8,6 +9,7 @@ import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.dartmoortors.R
 
 /**
  * Navigation destinations for the app.
@@ -15,8 +17,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 sealed class Screen(
     val route: String,
     val title: String,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector
+    val selectedIcon: ImageVector? = null,
+    val unselectedIcon: ImageVector? = null,
+    @DrawableRes val iconRes: Int? = null
 ) {
     data object Map : Screen(
         route = "map",
@@ -28,8 +31,7 @@ sealed class Screen(
     data object Collection : Screen(
         route = "collection",
         title = "Collection",
-        selectedIcon = Icons.Filled.Map, // Will use custom tor icon
-        unselectedIcon = Icons.Outlined.Map
+        iconRes = R.drawable.ic_tor_nav
     )
     
     data object Photos : Screen(

@@ -3,6 +3,7 @@ package com.dartmoortors.ui.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import com.dartmoortors.data.model.*
@@ -55,6 +56,14 @@ class SearchViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
     
     /**
+     * Debounced search query to prevent filtering on every keystroke.
+     */
+    @OptIn(FlowPreview::class)
+    private val debouncedSearchQuery = _searchQuery
+        .debounce(300L)
+        .distinctUntilChanged()
+    
+    /**
      * Combined filter inputs to reduce combine parameters.
      */
     private data class FilterInputs(
@@ -71,7 +80,7 @@ class SearchViewModel @Inject constructor(
     private val filterInputs = combine(
         torRepository.tors,
         visitedTorIds,
-        _searchQuery,
+        debouncedSearchQuery,
         enabledClassifications
     ) { tors, visitedIds, query, classifications ->
         Pair(Pair(tors, visitedIds), Pair(query, classifications))
@@ -103,16 +112,15 @@ class SearchViewModel @Inject constructor(
             if (!tor.isInCollection(collectionId)) return@filter false
             
             val matchesQuery = inputs.query.isBlank() || tor.name.contains(inputs.query, ignoreCase = true)
-            val classification = Classification.fromString(tor.classification)
-            val access = Access.fromString(tor.access)
             val isVisited = inputs.visitedIds.contains(tor.id)
             
             // Only apply classification filter if collection has sub-filters
-            val classificationMatch = !hasSubFilters || inputs.classifications.contains(classification)
+            // Use cached enum properties for performance
+            val classificationMatch = !hasSubFilters || inputs.classifications.contains(tor.classificationEnum)
             
             matchesQuery &&
                 classificationMatch &&
-                (!inputs.showAccessible || access.isAccessible) &&
+                (!inputs.showAccessible || tor.isAccessible) &&
                 ((inputs.showVisited && isVisited) || (inputs.showUnvisited && !isVisited))
         }.map { tor ->
             TorWithVisitState(

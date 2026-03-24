@@ -1,12 +1,20 @@
 package com.dartmoortors.data.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
  * Represents a visited tor record stored in the local database.
  */
-@Entity(tableName = "visited_tors")
+@Entity(
+    tableName = "visited_tors",
+    indices = [
+        Index(value = ["torId"], unique = true),
+        Index(value = ["checklistId"]),
+        Index(value = ["checklistId", "torId"])
+    ]
+)
 data class VisitedTor(
     @PrimaryKey
     val torId: String,
