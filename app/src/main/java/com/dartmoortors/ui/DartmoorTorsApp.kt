@@ -14,8 +14,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dartmoortors.ui.collection.CollectionScreen
+import com.dartmoortors.ui.collection.VisitedTorsScreen
 import com.dartmoortors.ui.map.MapScreen
 import com.dartmoortors.ui.map.MapViewModel
+import com.dartmoortors.ui.navigation.Routes
 import com.dartmoortors.ui.navigation.Screen
 import com.dartmoortors.ui.photos.PhotosScreen
 import com.dartmoortors.ui.search.SearchScreen
@@ -88,7 +90,29 @@ fun DartmoorTorsApp() {
             }
             
             composable(Screen.Collection.route) {
-                CollectionScreen()
+                CollectionScreen(
+                    onVisitedClick = {
+                        navController.navigate(Routes.VISITED_TORS)
+                    }
+                )
+            }
+
+            composable(Routes.VISITED_TORS) {
+                VisitedTorsScreen(
+                    onTorClick = { torId ->
+                        mapViewModel.selectTor(torId)
+                        navController.navigate(Screen.Map.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
             }
             
             composable(Screen.Photos.route) {

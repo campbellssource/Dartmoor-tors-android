@@ -107,14 +107,15 @@ fun TorDetailSheet(
                         }
                     }
                     
-                    // Error state - show add photo prompt
+                    // Error state - show broken photo indicator
                     if (imageLoadState is AsyncImagePainter.State.Error) {
-                        AddPhotoPrompt(
-                            onClick = {
+                        BrokenPhotoIndicator(
+                            onReplaceClick = {
                                 photoPickerLauncher.launch(
                                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                                 )
-                            }
+                            },
+                            onRemoveClick = onPhotoRemoved
                         )
                     } else {
                         // Overlay buttons for change/remove
@@ -367,6 +368,38 @@ fun TorDetailSheet(
                 Text("Wikipedia")
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Share button
+        Button(
+            onClick = {
+                val shareText = buildString {
+                    appendLine(tor.name)
+                    append("${tor.heightMeters}m")
+                    tor.parish?.let { append(" | $it") }
+                    appendLine()
+                    appendLine("OS Grid: ${tor.osGridRef}")
+                    appendLine("Lat: ${"%.6f".format(tor.latitude)}, Long: ${"%.6f".format(tor.longitude)}")
+                    appendLine()
+                    appendLine("Open in Dartmoor Tors: https://dartmoortors.com/tor/${tor.id}")
+                    tor.torsOfDartmoorURL?.let { appendLine("Tors of Dartmoor: $it") }
+                    append("Google Maps: https://maps.google.com/?q=${tor.latitude},${tor.longitude}")
+                }
+                val sendIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, shareText)
+                    type = "text/plain"
+                }
+                val shareIntent = Intent.createChooser(sendIntent, "Share ${tor.name}")
+                context.startActivity(shareIntent)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Default.Share, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Share")
+        }
         }
     }
     
@@ -425,6 +458,60 @@ private fun AddPhotoPrompt(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
+
+/**
+ * Indicator shown when a photo reference is broken (file deleted or inaccessible).
+ */
+@Composable
+private fun BrokenPhotoIndicator(
+    onReplaceClick: () -> Unit,
+    onRemoveClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                Icons.Default.BrokenImage,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.error
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Photo unavailable",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.error
+            )
+            Text(
+                text = "The original file may have been deleted",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onErrorContainer
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilledTonalButton(onClick = onReplaceClick) {
+                    Icon(Icons.Default.AddAPhoto, contentDescription = null)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Replace")
+                }
+                OutlinedButton(onClick = onRemoveClick) {
+                    Icon(Icons.Default.Delete, contentDescription = null)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Remove")
+                }
+            }
         }
     }
 }

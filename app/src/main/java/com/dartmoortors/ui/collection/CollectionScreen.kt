@@ -22,6 +22,7 @@ import com.dartmoortors.data.model.TorCollection
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollectionScreen(
+    onVisitedClick: () -> Unit = {},
     viewModel: CollectionViewModel = hiltViewModel()
 ) {
     val collections by viewModel.collections.collectAsState()
@@ -77,17 +78,30 @@ fun CollectionScreen(
         
         // Progress section
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onVisitedClick),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer
             )
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "Progress",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Progress",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Icon(
+                        Icons.Default.ChevronRight,
+                        contentDescription = "View visited tors",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 selectedCollection?.let { collection ->
                     Text(

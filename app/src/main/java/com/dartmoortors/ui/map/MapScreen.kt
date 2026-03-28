@@ -188,57 +188,93 @@ fun MapScreen(
                 compassEnabled = true
             )
         ) {
-            // OPTIMIZED: Marker Clustering
-            // This groups markers together when zoomed out, significantly improving panning performance.
-            Clustering(
-                items = clusterItems,
-                onClusterItemClick = { item ->
-                    onTorSelected(item.id)
-                    true
-                },
-                clusterContent = { cluster ->
-                    // Custom cluster appearance (Circle with count)
-                    Surface(
-                        modifier = Modifier.size(40.dp),
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        tonalElevation = 4.dp,
-                        shadowElevation = 4.dp
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = cluster.size.toString(),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center
+            // Conditional clustering: only cluster when there are more than 270 tors
+            if (clusterItems.size > 270) {
+                // OPTIMIZED: Marker Clustering for large collections
+                // This groups markers together when zoomed out, significantly improving panning performance.
+                Clustering(
+                    items = clusterItems,
+                    onClusterItemClick = { item ->
+                        onTorSelected(item.id)
+                        true
+                    },
+                    clusterContent = { cluster ->
+                        // Custom cluster appearance (Circle with count)
+                        Surface(
+                            modifier = Modifier.size(40.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            tonalElevation = 4.dp,
+                            shadowElevation = 4.dp
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = cluster.size.toString(),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    },
+                    clusterItemContent = { item ->
+                        // Custom individual marker appearance
+                        val color = when {
+                            item.isVisited -> Green
+                            item.isAccessible -> Teal
+                            else -> Orange
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .background(color, CircleShape)
+                                .border(2.dp, Color.White, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Place,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = Color.White
                             )
                         }
                     }
-                },
-                clusterItemContent = { item ->
-                    // Custom individual marker appearance
+                )
+            } else {
+                // Individual markers for smaller collections (no clustering)
+                clusterItems.forEach { item ->
                     val color = when {
                         item.isVisited -> Green
                         item.isAccessible -> Teal
                         else -> Orange
                     }
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .background(color, CircleShape)
-                            .border(2.dp, Color.White, CircleShape),
-                        contentAlignment = Alignment.Center
+                    MarkerComposable(
+                        keys = arrayOf(item.id, item.isVisited),
+                        state = rememberMarkerState(position = item.position),
+                        title = item.title,
+                        onClick = {
+                            onTorSelected(item.id)
+                            true
+                        }
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Place,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = Color.White
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .background(color, CircleShape)
+                                .border(2.dp, Color.White, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Place,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = Color.White
+                            )
+                        }
                     }
                 }
-            )
+            }
             
             // Compass line of sight
             if (showCompassLine && currentLocation != null && hasLocationPermission) {

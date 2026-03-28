@@ -8,6 +8,8 @@ import kotlinx.coroutines.launch
 import com.dartmoortors.data.model.Classification
 import com.dartmoortors.data.model.TorCollection
 import com.dartmoortors.data.model.Tor
+import com.dartmoortors.data.model.TorWithVisitState
+import com.dartmoortors.data.model.VisitedTor
 import com.dartmoortors.data.repository.CollectionRepository
 import com.dartmoortors.data.repository.PreferencesRepository
 import com.dartmoortors.data.repository.TorRepository
@@ -140,6 +142,30 @@ class CollectionViewModel @Inject constructor(
     ) { filtered, visitedIds ->
         filtered.count { visitedIds.contains(it.id) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    /**
+     * Visited tors within the current filtered collection, with visit state.
+     */
+    private val visitedTorsFlow: StateFlow<List<VisitedTor>> = visitedTorRepository
+        .getVisitedTors()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val visitedTorsInFilteredCollection: StateFlow<List<TorWithVisitState>> = combine(
+        filteredTors,
+        visitedTorIds,
+        visitedTorsFlow
+    ) { filtered, visitedIds, visitedTorsList ->
+        val visitedTorsMap = visitedTorsList.associateBy { it.torId }
+        filtered
+            .filter { visitedIds.contains(it.id) }
+            .map { tor ->
+                TorWithVisitState(
+                    tor = tor,
+                    visitedTor = visitedTorsMap[tor.id]
+                )
+            }
+            .sortedBy { it.tor.name }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     
     /**
      * Progress data.

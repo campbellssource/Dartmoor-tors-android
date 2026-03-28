@@ -58,6 +58,7 @@ sealed class Screen(
  */
 object Routes {
     const val TOR_DETAIL = "tor/{torId}"
-    
+    const val VISITED_TORS = "visited_tors"
+
     fun torDetail(torId: String) = "tor/$torId"
 }
