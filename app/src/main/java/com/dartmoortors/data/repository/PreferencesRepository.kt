@@ -27,7 +27,6 @@ class PreferencesRepository @Inject constructor(
     private object PreferencesKeys {
         val ENABLED_CLASSIFICATIONS = stringSetPreferencesKey("enabled_classifications")
         val ACCESSIBLE_ONLY = booleanPreferencesKey("accessible_only")
-        val SHOW_WELCOME = booleanPreferencesKey("show_welcome")
         val SORT_OPTION = stringPreferencesKey("sort_option")
         val MAP_TYPE = intPreferencesKey("map_type")
         val SHOW_PHOTOS_LAYER = booleanPreferencesKey("show_photos_layer")
@@ -87,22 +86,7 @@ class PreferencesRepository @Inject constructor(
         .map { preferences ->
             preferences[PreferencesKeys.ACCESSIBLE_ONLY] ?: true
         }
-    
-    /**
-     * Get whether to show welcome screen.
-     */
-    val showWelcome: Flow<Boolean> = context.dataStore.data
-        .catch { exception ->
-            if (exception is IOException) {
-                emit(emptyPreferences())
-            } else {
-                throw exception
-            }
-        }
-        .map { preferences ->
-            preferences[PreferencesKeys.SHOW_WELCOME] ?: true
-        }
-    
+
     /**
      * Get the current sort option.
      */
@@ -187,16 +171,7 @@ class PreferencesRepository @Inject constructor(
             preferences[PreferencesKeys.ACCESSIBLE_ONLY] = accessibleOnly
         }
     }
-    
-    /**
-     * Update show welcome screen.
-     */
-    suspend fun setShowWelcome(show: Boolean) {
-        context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.SHOW_WELCOME] = show
-        }
-    }
-    
+
     /**
      * Update sort option.
      */

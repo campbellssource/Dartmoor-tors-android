@@ -2,18 +2,10 @@ package com.dartmoortors.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary teal colors (accessible tors)
-val Teal = Color(0xFF00897B)
-val TealLight = Color(0xFF4EBAAA)
-val TealDark = Color(0xFF005B4F)
-
-// Secondary green colors (visited tors)
-val Green = Color(0xFF4CAF50)
-val GreenLight = Color(0xFF80E27E)
-val GreenDark = Color(0xFF087F23)
-
-// Tertiary colors
-val Orange = Color(0xFFFF9800) // Not accessible tors
+// Marker colors - matched to iOS SwiftUI system colors
+val Green = Color(0xFF34C759)   // Visited tors (iOS .green)
+val Teal = Color(0xFF30B0C7)    // Accessible tors (iOS .teal)
+val Orange = Color(0xFFFF9500)  // Not accessible tors (iOS .orange)
 val OrangeLight = Color(0xFFFFD54F)
 val OrangeDark = Color(0xFFF57C00)
 

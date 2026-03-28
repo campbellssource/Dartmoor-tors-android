@@ -39,7 +39,6 @@ import com.dartmoortors.data.model.Photo
 import com.dartmoortors.data.model.TorWithVisitState
 import com.dartmoortors.data.repository.TorWithDistance
 import com.dartmoortors.ui.components.TorDetailSheet
-import com.dartmoortors.ui.components.WelcomeDialog
 import com.dartmoortors.ui.map.TrackingMode
 import com.dartmoortors.ui.theme.Green
 import com.dartmoortors.ui.theme.Orange
@@ -60,7 +59,6 @@ fun MapScreen(
     val context = LocalContext.current
     val clusterItems by viewModel.clusterItems.collectAsState()
     val selectedTor by viewModel.selectedTor.collectAsState()
-    val showWelcome by viewModel.showWelcome.collectAsState()
     val mapType by viewModel.mapType.collectAsState()
     val cameraTarget by viewModel.cameraTarget.collectAsState()
     val cameraZoom by viewModel.cameraZoom.collectAsState()
@@ -219,32 +217,46 @@ fun MapScreen(
                         }
                     },
                     clusterItemContent = { item ->
-                        // Custom individual marker appearance
+                        // Custom individual marker appearance - simple circle
                         val color = when {
+                            !item.isInActiveCollection -> Color.Gray
                             item.isVisited -> Green
                             item.isAccessible -> Teal
                             else -> Orange
                         }
                         Box(
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(16.dp)
                                 .background(color, CircleShape)
-                                .border(2.dp, Color.White, CircleShape),
-                            contentAlignment = Alignment.Center
+                                .border(1.dp, Color.White, CircleShape)
+                        )
+                    }
+                )
+
+                // Show selected tor with grey marker if it's not in the active collection
+                selectedTor?.let { torWithState ->
+                    if (!torWithState.isInActiveCollection) {
+                        MarkerComposable(
+                            keys = arrayOf(torWithState.tor.id, "selected-out-of-collection"),
+                            state = rememberMarkerState(
+                                position = LatLng(torWithState.tor.latitude, torWithState.tor.longitude)
+                            ),
+                            title = torWithState.tor.name
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Place,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = Color.White
+                            Box(
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .background(Color.Gray, CircleShape)
+                                    .border(2.dp, Color.White, CircleShape)
                             )
                         }
                     }
-                )
+                }
             } else {
                 // Individual markers for smaller collections (no clustering)
                 clusterItems.forEach { item ->
                     val color = when {
+                        !item.isInActiveCollection -> Color.Gray
                         item.isVisited -> Green
                         item.isAccessible -> Teal
                         else -> Orange
@@ -258,24 +270,37 @@ fun MapScreen(
                             true
                         }
                     ) {
+                        // Simple circle marker
                         Box(
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(16.dp)
                                 .background(color, CircleShape)
-                                .border(2.dp, Color.White, CircleShape),
-                            contentAlignment = Alignment.Center
+                                .border(1.dp, Color.White, CircleShape)
+                        )
+                    }
+                }
+
+                // Show selected tor with grey marker if it's not in the active collection
+                selectedTor?.let { torWithState ->
+                    if (!torWithState.isInActiveCollection) {
+                        MarkerComposable(
+                            keys = arrayOf(torWithState.tor.id, "selected-out-of-collection"),
+                            state = rememberMarkerState(
+                                position = LatLng(torWithState.tor.latitude, torWithState.tor.longitude)
+                            ),
+                            title = torWithState.tor.name // No onClick - just display
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Place,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = Color.White
+                            Box(
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .background(Color.Gray, CircleShape)
+                                    .border(2.dp, Color.White, CircleShape)
                             )
                         }
                     }
                 }
             }
-            
+
             // Compass line of sight
             if (showCompassLine && currentLocation != null && hasLocationPermission) {
                 val userLatLng = LatLng(currentLocation!!.latitude, currentLocation!!.longitude)
@@ -459,11 +484,7 @@ fun MapScreen(
                 Text(errorMessage)
             }
         }
-        
-        if (showWelcome) {
-            WelcomeDialog(onDismiss = { viewModel.dismissWelcome() })
-        }
-        
+
         selectedTor?.let { torWithState ->
             ModalBottomSheet(
                 onDismissRequest = { viewModel.deselectTor() },

@@ -154,13 +154,13 @@ private fun TorListItem(
 ) {
     val tor = torWithState.tor
     val access = Access.fromString(tor.access)
-    
+
     val color = when {
         torWithState.isVisited -> Green
         access.isAccessible -> Teal
         else -> Orange
     }
-    
+
     ListItem(
         modifier = Modifier.clickable(onClick = onClick),
         headlineContent = {
@@ -170,7 +170,16 @@ private fun TorListItem(
             )
         },
         supportingContent = {
-            Text("${tor.heightMeters}m • ${tor.classification}")
+            Column {
+                Text("${tor.heightMeters}m • ${tor.classification}")
+                if (!torWithState.isInActiveCollection) {
+                    Text(
+                        text = "Not in active Collection",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         },
         leadingContent = {
             Icon(

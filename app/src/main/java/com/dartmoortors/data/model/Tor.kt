@@ -62,20 +62,21 @@ data class Tor(
  * Tor classifications from torsofdartmoor.co.uk
  */
 enum class Classification(val displayName: String, val defaultEnabled: Boolean) {
+    // All types enabled by default on first selection of Tors of Dartmoor collection
     SUMMIT("Summit", true),
     SUMMIT_AVENUE("Summit Avenue", true),
     VALLEY_SIDE("Valley Side", true),
-    SPUR("Spur", false),
-    EMERGENT("Emergent", false),
-    SMALL("Small", false),
-    RUINED("Ruined", false),
-    CLITTER("Clitter", false),
-    GORGE("Gorge", false),
-    GULLY("Gully", false),
-    ARTIFICIAL("Artificial", false),
-    BOULDER("Boulder", false),
-    GLACIAL_REMAINS("Glacial Remains", false),
-    UNKNOWN("Unknown", false);
+    SPUR("Spur", true),
+    EMERGENT("Emergent", true),
+    SMALL("Small", true),
+    RUINED("Ruined", true),
+    CLITTER("Clitter", true),
+    GORGE("Gorge", true),
+    GULLY("Gully", true),
+    ARTIFICIAL("Artificial", true),
+    BOULDER("Boulder", true),
+    GLACIAL_REMAINS("Glacial Remains", true),
+    UNKNOWN("Unknown", true);
     
     companion object {
         fun fromString(value: String): Classification {

@@ -61,10 +61,7 @@ class MapViewModel @Inject constructor(
     
     private val _nearbyTorsForPhoto = MutableStateFlow<List<TorWithDistance>>(emptyList())
     val nearbyTorsForPhoto: StateFlow<List<TorWithDistance>> = _nearbyTorsForPhoto.asStateFlow()
-    
-    private val _showWelcome = MutableStateFlow(true)
-    val showWelcome: StateFlow<Boolean> = _showWelcome.asStateFlow()
-    
+
     private val _cameraTarget = MutableStateFlow<LatLng?>(null)
     val cameraTarget: StateFlow<LatLng?> = _cameraTarget.asStateFlow()
     
@@ -188,8 +185,12 @@ class MapViewModel @Inject constructor(
      * Currently selected tor with visit state.
      * Uses O(1) map lookups and direct observation for fast response.
      */
-    val selectedTor: StateFlow<TorWithVisitState?> = _selectedTorId
-        .flatMapLatest { selectedId ->
+    val selectedTor: StateFlow<TorWithVisitState?> = combine(
+        _selectedTorId,
+        selectedCollectionId
+    ) { selectedId, collectionId ->
+        Pair(selectedId, collectionId)
+    }.flatMapLatest { (selectedId, collectionId) ->
             if (selectedId == null) {
                 flowOf(null)
             } else {
@@ -198,7 +199,11 @@ class MapViewModel @Inject constructor(
                     flowOf(null)
                 } else {
                     visitedTorRepository.observeVisitedTor(selectedId).map { visitedTor ->
-                        TorWithVisitState(tor = tor, visitedTor = visitedTor)
+                        TorWithVisitState(
+                            tor = tor,
+                            visitedTor = visitedTor,
+                            isInActiveCollection = tor.isInCollection(collectionId)
+                        )
                     }
                 }
             }
@@ -210,13 +215,7 @@ class MapViewModel @Inject constructor(
             torRepository.loadTors()
             collectionRepository.loadCollections()
         }
-        
-        viewModelScope.launch {
-            preferencesRepository.showWelcome.collect { show ->
-                _showWelcome.value = show
-            }
-        }
-        
+
         // Load photos when photos layer is enabled
         viewModelScope.launch {
             showPhotosLayer.collect { enabled ->
@@ -321,16 +320,7 @@ class MapViewModel @Inject constructor(
     fun deselectTor() {
         _selectedTorId.value = null
     }
-    
-    /**
-     * Dismiss the welcome dialog.
-     */
-    fun dismissWelcome() {
-        viewModelScope.launch {
-            preferencesRepository.setShowWelcome(false)
-        }
-    }
-    
+
     /**
      * Mark a tor as visited.
      */

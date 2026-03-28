@@ -108,16 +108,18 @@ class SearchViewModel @Inject constructor(
         selectedCollectionHasSubFilters
     ) { inputs, collectionId, hasSubFilters ->
         inputs.tors.filter { tor ->
-            // Must be in selected collection
-            if (!tor.isInCollection(collectionId)) return@filter false
-            
+            // When searching, show ALL matching tors (not just those in collection)
+            // When not searching, only show tors in selected collection
+            val isSearching = inputs.query.isNotBlank()
+            if (!isSearching && !tor.isInCollection(collectionId)) return@filter false
+
             val matchesQuery = inputs.query.isBlank() || tor.name.contains(inputs.query, ignoreCase = true)
             val isVisited = inputs.visitedIds.contains(tor.id)
-            
+
             // Only apply classification filter if collection has sub-filters
             // Use cached enum properties for performance
             val classificationMatch = !hasSubFilters || inputs.classifications.contains(tor.classificationEnum)
-            
+
             matchesQuery &&
                 classificationMatch &&
                 (!inputs.showAccessible || tor.isAccessible) &&
@@ -127,7 +129,8 @@ class SearchViewModel @Inject constructor(
                 tor = tor,
                 visitedTor = if (inputs.visitedIds.contains(tor.id)) {
                     VisitedTor(torId = tor.id, visitedDate = 0L)
-                } else null
+                } else null,
+                isInActiveCollection = tor.isInCollection(collectionId)
             )
         }.let { list ->
             when (inputs.sort) {

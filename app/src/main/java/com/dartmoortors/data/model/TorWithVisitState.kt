@@ -6,7 +6,8 @@ package com.dartmoortors.data.model
 data class TorWithVisitState(
     val tor: Tor,
     val visitedTor: VisitedTor?,
-    val distanceMeters: Float? = null
+    val distanceMeters: Float? = null,
+    val isInActiveCollection: Boolean = true
 ) {
     val isVisited: Boolean get() = visitedTor != null
     val hasPhoto: Boolean get() = visitedTor?.photoUri != null

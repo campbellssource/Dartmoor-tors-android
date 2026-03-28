@@ -60,7 +60,19 @@ fun TorDetailSheet(
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
-        uri?.let { onPhotoSelected(it) }
+        uri?.let {
+            // Take persistent permission so the URI remains valid after app restart
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    it,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (e: SecurityException) {
+                // Some URIs don't support persistent permissions - continue anyway
+                // The photo may become inaccessible after restart
+            }
+            onPhotoSelected(it)
+        }
     }
     
     // Track image loading state
@@ -243,7 +255,23 @@ fun TorDetailSheet(
                 color = if (access.isAccessible) MaterialTheme.colorScheme.onSurface else Orange
             )
         }
-        
+
+        // Not in active collection badge
+        if (!torWithState.isInActiveCollection) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Text(
+                    text = "Not in Active Collection",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+            }
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
         
         // Visited toggle
