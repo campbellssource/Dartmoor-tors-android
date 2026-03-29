@@ -180,208 +180,193 @@ fun TorDetailSheet(
                 .padding(horizontal = 24.dp)
                 .padding(top = if (torWithState.isVisited) 16.dp else 0.dp, bottom = 24.dp)
         ) {
-        // Tor name
+        // Heading: Tor name
         Text(
             text = tor.name,
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Height
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Default.Terrain,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "${tor.heightMeters}m",
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
-        // Grid reference
+
+        // Sub heading: [height] [tor category with link]
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Default.GridOn,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = tor.osGridRef,
-                style = MaterialTheme.typography.bodyLarge
+                text = "${tor.heightMeters}m height.",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        // Coordinates
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Default.Place,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "%.6f, %.6f".format(tor.latitude, tor.longitude),
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        // Access status
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                if (access.isAccessible) Icons.Default.CheckCircle else Icons.Default.Warning,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = if (access.isAccessible) MaterialTheme.colorScheme.primary else Orange
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = access.displayName,
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (access.isAccessible) MaterialTheme.colorScheme.onSurface else Orange
-            )
+            tor.classification?.let { classification ->
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "Type:",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = classification,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.torsofdartmoor.co.uk/about.php#classification"))
+                        context.startActivity(intent)
+                    }
+                )
+            }
         }
 
-        // Not in active collection badge
-        if (!torWithState.isInActiveCollection) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            ) {
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Further sub heading: [Access status] [not in collection]
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = access.displayName,
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (access.isAccessible) MaterialTheme.colorScheme.onSurfaceVariant else Orange
+            )
+            if (!torWithState.isInActiveCollection) {
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Not in Active Collection",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    text = "Not in selected collection",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
-        
-        // Visited toggle
+
+        // Bagged status area
         if (torWithState.isVisited) {
-            // Visited state
-            Card(
+            // Visited state: date with edit button
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.primaryContainer
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Default.CheckCircle,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Visited",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        TextButton(onClick = onUnmarkVisited) {
-                            Text("Unmark")
-                        }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    // Date display/picker
-                    OutlinedButton(
-                        onClick = { showDatePicker = true },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Default.CalendarToday, contentDescription = null)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Bagged on",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = torWithState.visitedTor?.let {
                                 dateFormatter.format(Date(it.visitedDate))
-                            } ?: "Select date"
+                            } ?: "",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
+                    }
+                    TextButton(onClick = { showDatePicker = true }) {
+                        Text("Edit")
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            TextButton(
+                onClick = onUnmarkVisited,
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Remove from Bagged")
+            }
         } else {
-            // Not visited - show mark as visited button
+            // Not visited: full width button "Bag this Tor"
             Button(
                 onClick = onMarkVisited,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(Icons.Default.Check, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Mark as Visited")
+                Text("Bag this Tor")
             }
         }
-        
+
         Spacer(modifier = Modifier.height(24.dp))
-        
-        // External links
-        Text(
-            text = "Open in...",
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        // Google Maps link
-        OutlinedButton(
-            onClick = {
-                val uri = Uri.parse("geo:${tor.latitude},${tor.longitude}?q=${tor.latitude},${tor.longitude}(${Uri.encode(tor.name)})")
-                val intent = Intent(Intent.ACTION_VIEW, uri)
-                context.startActivity(intent)
-            },
-            modifier = Modifier.fillMaxWidth()
+
+        HorizontalDivider()
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Detail section
+        // Grid reference with OS Maps link
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Map, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Google Maps")
+            Text(
+                text = "OS Grid: ${tor.osGridRef}",
+                style = MaterialTheme.typography.bodyLarge
+            )
+            TextButton(
+                onClick = {
+                    val uri = Uri.parse("https://osmaps.com/map?lat=${tor.latitude}&lon=${tor.longitude}&zoom=16")
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                    context.startActivity(intent)
+                }
+            ) {
+                Text("OS Maps")
+            }
         }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        // Tors of Dartmoor link
+
+        // Coordinates with Google Maps link
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Lat: ${"%.4f".format(tor.latitude)}, Long: ${"%.4f".format(tor.longitude)}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            TextButton(
+                onClick = {
+                    val uri = Uri.parse("geo:${tor.latitude},${tor.longitude}?q=${tor.latitude},${tor.longitude}(${Uri.encode(tor.name)})")
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                    context.startActivity(intent)
+                }
+            ) {
+                Text("Google Maps")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Tors of Dartmoor link with UTM
         tor.torsOfDartmoorURL?.let { url ->
             OutlinedButton(
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    val urlWithUtm = "$url?utm_source=dartmoortorsapp-tordetail&medium=android"
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(urlWithUtm))
                     context.startActivity(intent)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(Icons.Default.Language, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Tors of Dartmoor")
+                Text("View on torsofdartmoor.co.uk")
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
         }
-        
+
         // Wikipedia link
         tor.wikipediaURL?.let { url ->
             OutlinedButton(
@@ -393,11 +378,84 @@ fun TorDetailSheet(
             ) {
                 Icon(Icons.Default.MenuBook, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Wikipedia")
+                Text("Read about on Wikipedia")
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        HorizontalDivider()
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Metadata section
+        Text(
+            text = "Details",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        tor.parish?.let { parish ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Parish",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = parish,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+        }
+
+        tor.rockType?.let { rockType ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Rock Type",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = rockType,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+
+        // Collections section
+        tor.collections?.takeIf { it.isNotEmpty() }?.let { collections ->
+            Spacer(modifier = Modifier.height(16.dp))
+
+            HorizontalDivider()
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Collections",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = collections.map { collectionDisplayName(it) }.joinToString(", "),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Share button
         Button(
@@ -453,6 +511,18 @@ fun TorDetailSheet(
         ) {
             DatePicker(state = datePickerState)
         }
+    }
+}
+
+/**
+ * Convert collection ID to display name.
+ */
+private fun collectionDisplayName(id: String): String {
+    return when (id) {
+        "os-map" -> "OS Map Tors"
+        "tors-of-dartmoor" -> "Compendium"
+        "rock-idols" -> "Rock Idols"
+        else -> id.replace("-", " ").split(" ").joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
     }
 }
 
