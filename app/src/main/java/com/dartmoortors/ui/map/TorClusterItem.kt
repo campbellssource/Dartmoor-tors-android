@@ -23,10 +23,14 @@ class TorClusterItem(
     val isAccessible: Boolean = torWithState.tor.isAccessible
     val isInActiveCollection: Boolean = torWithState.isInActiveCollection
 
+    // Photo properties for thumbnail display
+    val hasPhoto: Boolean = torWithState.hasPhoto
+    val photoUri: String? = torWithState.visitedTor?.photoUri
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is TorClusterItem) return false
-        return id == other.id && isVisited == other.isVisited && isAccessible == other.isAccessible && isInActiveCollection == other.isInActiveCollection
+        return id == other.id && isVisited == other.isVisited && isAccessible == other.isAccessible && isInActiveCollection == other.isInActiveCollection && photoUri == other.photoUri
     }
 
     override fun hashCode(): Int {
@@ -34,6 +38,7 @@ class TorClusterItem(
         result = 31 * result + isVisited.hashCode()
         result = 31 * result + isAccessible.hashCode()
         result = 31 * result + isInActiveCollection.hashCode()
+        result = 31 * result + (photoUri?.hashCode() ?: 0)
         return result
     }
 }

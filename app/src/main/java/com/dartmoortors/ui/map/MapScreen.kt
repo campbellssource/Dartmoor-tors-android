@@ -50,6 +50,39 @@ import kotlin.math.max
 
 private const val TAG = "MapScreen"
 
+@Composable
+private fun AsyncPhotoThumbnail(
+    photoUri: String,
+    fallbackColor: Color,
+    size: Float,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+
+    Box(
+        modifier = modifier
+            .size(size.dp)
+            .clip(CircleShape)
+            .background(fallbackColor),
+        contentAlignment = Alignment.Center
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(context)
+                .data(photoUri)
+                .size((size * 2).toInt()) // Request 2x for pixel density
+                .crossfade(true)
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .build(),
+            contentDescription = "Photo thumbnail",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(CircleShape)
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
@@ -83,8 +116,7 @@ fun MapScreen(
     
     // Permission state
     var hasLocationPermission by remember { mutableStateOf(viewModel.hasLocationPermission()) }
-    var hasPhotoPermission by remember { mutableStateOf(viewModel.hasPhotoPermission()) }
-    
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -92,15 +124,6 @@ fun MapScreen(
                 permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
         if (hasLocationPermission) {
             viewModel.startLocationTracking()
-        }
-    }
-    
-    val photoPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        hasPhotoPermission = granted
-        if (granted) {
-            viewModel.setShowPhotosLayer(true)
         }
     }
     
@@ -193,7 +216,7 @@ fun MapScreen(
                 Clustering(
                     items = clusterItems,
                     onClusterItemClick = { item ->
-                        onTorSelected(item.id)
+                        viewModel.selectTor(item.id)
                         true
                     },
                     clusterContent = { cluster ->
@@ -217,19 +240,28 @@ fun MapScreen(
                         }
                     },
                     clusterItemContent = { item ->
-                        // Custom individual marker appearance - simple circle
-                        val color = when {
-                            !item.isInActiveCollection -> Color.Gray
-                            item.isVisited -> Green
-                            item.isAccessible -> Teal
-                            else -> Orange
+                        // Show photo thumbnail if visited and has photo
+                        if (item.isVisited && item.hasPhoto && item.photoUri != null) {
+                            AsyncPhotoThumbnail(
+                                photoUri = item.photoUri,
+                                fallbackColor = Green,
+                                size = 16f
+                            )
+                        } else {
+                            // Custom individual marker appearance - simple circle
+                            val color = when {
+                                !item.isInActiveCollection -> Color.Gray
+                                item.isVisited -> Green
+                                item.isAccessible -> Teal
+                                else -> Orange
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .background(color, CircleShape)
+                                    .border(1.dp, Color.White, CircleShape)
+                            )
                         }
-                        Box(
-                            modifier = Modifier
-                                .size(16.dp)
-                                .background(color, CircleShape)
-                                .border(1.dp, Color.White, CircleShape)
-                        )
                     }
                 )
 
@@ -253,47 +285,35 @@ fun MapScreen(
                     }
                 }
             } else {
-                // Individual markers for smaller collections (no clustering)
+                // NO CLUSTERING: Show individual markers for smaller collections
+                // This allows for more granular control when the number of markers is manageable.
                 clusterItems.forEach { item ->
-                    val color = when {
-                        !item.isInActiveCollection -> Color.Gray
-                        item.isVisited -> Green
-                        item.isAccessible -> Teal
-                        else -> Orange
-                    }
                     MarkerComposable(
-                        keys = arrayOf(item.id, item.isVisited),
+                        keys = arrayOf(item.id, item.isVisited, item.isInActiveCollection),
                         state = rememberMarkerState(position = item.position),
                         title = item.title,
                         onClick = {
-                            onTorSelected(item.id)
+                            viewModel.selectTor(item.id)
                             true
                         }
                     ) {
-                        // Simple circle marker
-                        Box(
-                            modifier = Modifier
-                                .size(16.dp)
-                                .background(color, CircleShape)
-                                .border(1.dp, Color.White, CircleShape)
-                        )
-                    }
-                }
-
-                // Show selected tor with grey marker if it's not in the active collection
-                selectedTor?.let { torWithState ->
-                    if (!torWithState.isInActiveCollection) {
-                        MarkerComposable(
-                            keys = arrayOf(torWithState.tor.id, "selected-out-of-collection"),
-                            state = rememberMarkerState(
-                                position = LatLng(torWithState.tor.latitude, torWithState.tor.longitude)
-                            ),
-                            title = torWithState.tor.name // No onClick - just display
-                        ) {
+                        if (item.isVisited && item.hasPhoto && item.photoUri != null) {
+                            AsyncPhotoThumbnail(
+                                photoUri = item.photoUri,
+                                fallbackColor = Green,
+                                size = 20f
+                            )
+                        } else {
+                            val color = when {
+                                !item.isInActiveCollection -> Color.Gray
+                                item.isVisited -> Green
+                                item.isAccessible -> Teal
+                                else -> Orange
+                            }
                             Box(
                                 modifier = Modifier
                                     .size(20.dp)
-                                    .background(Color.Gray, CircleShape)
+                                    .background(color, CircleShape)
                                     .border(2.dp, Color.White, CircleShape)
                             )
                         }
@@ -301,58 +321,74 @@ fun MapScreen(
                 }
             }
 
-            // Compass line of sight
-            if (showCompassLine && currentLocation != null && hasLocationPermission) {
+            // Photos Layer
+            if (showPhotosLayer) {
+                mapPhotos.forEach { photo ->
+                    if (photo.latitude != null && photo.longitude != null) {
+                        MarkerComposable(
+                            keys = arrayOf(photo.id, photo.uri),
+                            state = rememberMarkerState(position = LatLng(photo.latitude, photo.longitude)),
+                            onClick = {
+                                viewModel.selectPhoto(photo)
+                                true
+                            }
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .border(2.dp, Purple, CircleShape)
+                                    .padding(2.dp)
+                            ) {
+                                AsyncPhotoThumbnail(
+                                    photoUri = photo.uri.toString(),
+                                    fallbackColor = Purple,
+                                    size = 28f
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Compass Line of Sight
+            if (showCompassLine && currentLocation != null && trackingMode == TrackingMode.FOLLOW_COMPASS) {
                 val userLatLng = LatLng(currentLocation!!.latitude, currentLocation!!.longitude)
                 val endPoint = viewModel.calculateCompassLineEndpoint(cameraPositionState.position.zoom)
                 endPoint?.let { end ->
                     Polyline(
                         points = listOf(userLatLng, end),
-                        color = Color.Red,
-                        width = 8f
+                        color = Purple.copy(alpha = 0.6f),
+                        width = 5f,
+                        geodesic = true
                     )
                 }
             }
-            
-            // Photo markers (purple pins)
-            if (showPhotosLayer) {
-                mapPhotos.forEach { photo ->
-                    if (photo.latitude != null && photo.longitude != null) {
-                        Marker(
-                            state = rememberMarkerState(key = photo.uri.toString(), position = LatLng(photo.latitude, photo.longitude)),
-                            title = photo.displayName ?: "Photo",
-                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET),
-                            onClick = {
-                                viewModel.selectPhoto(photo)
-                                true
-                            }
-                        )
-                    }
-                }
-            }
         }
-        
-        // Map controls
+
+        // Overlay Controls
         Column(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            FloatingActionButton(
-                onClick = { viewModel.resetToDefaultView() },
-                containerColor = MaterialTheme.colorScheme.surface
-            ) {
-                Icon(Icons.Default.ZoomOutMap, contentDescription = "Reset to Dartmoor")
-            }
-
+            // Map Type Selector
             var showMapTypeMenu by remember { mutableStateOf(false) }
             Box {
                 FloatingActionButton(
                     onClick = { showMapTypeMenu = true },
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(48.dp)
                 ) {
-                    Icon(Icons.Default.Layers, contentDescription = "Map Type")
+                    Icon(
+                        imageVector = when(mapType) {
+                            1 -> Icons.Default.Terrain
+                            2 -> Icons.Default.Map
+                            else -> Icons.Default.Satellite
+                        },
+                        contentDescription = "Change Map Type"
+                    )
                 }
                 
                 DropdownMenu(
@@ -379,63 +415,32 @@ fun MapScreen(
                         onClick = { viewModel.setMapType(3); showMapTypeMenu = false },
                         leadingIcon = { if (mapType == 3) Icon(Icons.Default.Check, null) }
                     )
-                    HorizontalDivider()
-                    DropdownMenuItem(
-                        text = { Text("Show Photos") },
-                        onClick = { 
-                            if (showPhotosLayer) {
-                                viewModel.setShowPhotosLayer(false)
-                            } else {
-                                if (hasPhotoPermission) {
-                                    viewModel.setShowPhotosLayer(true)
-                                } else {
-                                    photoPermissionLauncher.launch(viewModel.getRequiredPhotoPermission())
-                                }
-                            }
-                            showMapTypeMenu = false
-                        },
-                        leadingIcon = { 
-                            if (showPhotosLayer) Icon(Icons.Default.Check, null, tint = Purple)
-                        },
-                        trailingIcon = {
-                            Icon(
-                                Icons.Default.PhotoLibrary, 
-                                contentDescription = null,
-                                tint = if (showPhotosLayer) Purple else LocalContentColor.current
-                            )
-                        }
+                }
+            }
+
+            // Compass Line Toggle
+            if (hasLocationPermission) {
+                FloatingActionButton(
+                    onClick = { viewModel.toggleCompassLine() },
+                    containerColor = if (showCompassLine) Purple else MaterialTheme.colorScheme.surface,
+                    contentColor = if (showCompassLine) Color.White else MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Explore,
+                        contentDescription = "Toggle Compass Line"
                     )
                 }
             }
         }
-        
-        Column(
+
+        // Bottom Controls
+        Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(16.dp)
+                .padding(bottom = 80.dp) // Avoid overlap with bottom nav if present
         ) {
-            if (hasLocationPermission) {
-                FloatingActionButton(
-                    onClick = { viewModel.toggleCompassLine() },
-                    containerColor = if (showCompassLine) {
-                        MaterialTheme.colorScheme.errorContainer
-                    } else {
-                        MaterialTheme.colorScheme.surface
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.NearMe,
-                        contentDescription = "Compass Line of Sight",
-                        tint = if (showCompassLine) {
-                            MaterialTheme.colorScheme.onErrorContainer
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        }
-                    )
-                }
-            }
-            
             FloatingActionButton(
                 onClick = {
                     if (hasLocationPermission) {
@@ -451,173 +456,152 @@ fun MapScreen(
                 },
                 containerColor = when (trackingMode) {
                     TrackingMode.NONE -> MaterialTheme.colorScheme.surface
-                    TrackingMode.FOLLOW -> MaterialTheme.colorScheme.primaryContainer
-                    TrackingMode.FOLLOW_COMPASS -> MaterialTheme.colorScheme.primary
+                    TrackingMode.FOLLOW -> MaterialTheme.colorScheme.primary
+                    TrackingMode.FOLLOW_COMPASS -> Purple
+                },
+                contentColor = when (trackingMode) {
+                    TrackingMode.NONE -> MaterialTheme.colorScheme.primary
+                    else -> MaterialTheme.colorScheme.onPrimary
                 }
             ) {
                 Icon(
                     imageVector = when (trackingMode) {
                         TrackingMode.NONE -> Icons.Default.MyLocation
-                        TrackingMode.FOLLOW -> Icons.Default.MyLocation
+                        TrackingMode.FOLLOW -> Icons.Default.LocationSearching
                         TrackingMode.FOLLOW_COMPASS -> Icons.Default.Explore
                     },
-                    contentDescription = "My Location",
-                    tint = when (trackingMode) {
-                        TrackingMode.NONE -> MaterialTheme.colorScheme.onSurface
-                        TrackingMode.FOLLOW -> MaterialTheme.colorScheme.onPrimaryContainer
-                        TrackingMode.FOLLOW_COMPASS -> MaterialTheme.colorScheme.onPrimary
+                    contentDescription = "Location Tracking"
+                )
+            }
+        }
+        
+        // Photo Detail Sheet
+        selectedPhoto?.let { photo ->
+            ModalBottomSheet(
+                onDismissRequest = { viewModel.deselectPhoto() },
+                sheetState = sheetState
+            ) {
+                PhotoDetailContent(
+                    photo = photo,
+                    nearbyTors = nearbyTorsForPhoto,
+                    onTorClick = { torId ->
+                        viewModel.associatePhotoWithTor(photo, torId)
+                        viewModel.deselectPhoto()
+                        onTorSelected(torId)
                     }
                 )
             }
         }
+
+        // Tor Detail Sheet
+        selectedTor?.let { torWithState ->
+            TorDetailSheet(
+                torWithState = torWithState,
+                onMarkVisited = { viewModel.markTorAsVisited(torWithState.tor.id) },
+                onUnmarkVisited = { viewModel.unmarkTorAsVisited(torWithState.tor.id) },
+                onDateChanged = { date -> viewModel.updateVisitedDate(torWithState.tor.id, date) },
+                onPhotoSelected = { uri -> viewModel.setTorPhoto(torWithState.tor.id, uri.toString()) },
+                onPhotoRemoved = { viewModel.removeTorPhoto(torWithState.tor.id) }
+            )
+        }
         
         if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        }
-        
-        error?.let { errorMessage ->
-            Snackbar(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp)
-            ) {
-                Text(errorMessage)
-            }
-        }
-
-        selectedTor?.let { torWithState ->
-            ModalBottomSheet(
-                onDismissRequest = { viewModel.deselectTor() },
-                sheetState = sheetState
-            ) {
-                TorDetailSheet(
-                    torWithState = torWithState,
-                    onMarkVisited = { viewModel.markTorAsVisited(torWithState.tor.id) },
-                    onUnmarkVisited = { viewModel.unmarkTorAsVisited(torWithState.tor.id) },
-                    onDateChanged = { date -> viewModel.updateVisitedDate(torWithState.tor.id, date) },
-                    onPhotoSelected = { uri -> viewModel.setTorPhoto(torWithState.tor.id, uri.toString()) },
-                    onPhotoRemoved = { viewModel.removeTorPhoto(torWithState.tor.id) }
-                )
-            }
-        }
-        
-        selectedPhoto?.let { photo ->
-            val photoSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-            ModalBottomSheet(
-                onDismissRequest = { viewModel.deselectPhoto() },
-                sheetState = photoSheetState
-            ) {
-                PhotoPreviewSheet(
-                    photo = photo,
-                    nearbyTors = nearbyTorsForPhoto,
-                    onTorSelected = { torId -> viewModel.associatePhotoWithTor(photo, torId) },
-                    onDismiss = { viewModel.deselectPhoto() }
-                )
-            }
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
         }
     }
 }
 
 @Composable
-private fun PhotoPreviewSheet(
+fun PhotoDetailContent(
     photo: Photo,
     nearbyTors: List<TorWithDistance>,
-    onTorSelected: (String) -> Unit,
-    onDismiss: () -> Unit
+    onTorClick: (String) -> Unit
 ) {
     val context = LocalContext.current
-    val dateFormatter = remember { SimpleDateFormat("d MMMM yyyy, HH:mm", Locale.getDefault()) }
+    val sdf = SimpleDateFormat("d MMMM yyyy, HH:mm", Locale.getDefault())
     
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 24.dp)
+            .padding(16.dp)
+            .padding(bottom = 32.dp)
     ) {
+        Text(
+            text = "Photo Details",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
         AsyncImage(
             model = ImageRequest.Builder(context)
                 .data(photo.uri)
-                .size(600, 400)
                 .crossfade(true)
-                .diskCachePolicy(CachePolicy.ENABLED)
-                .memoryCachePolicy(CachePolicy.ENABLED)
                 .build(),
-            contentDescription = "Photo preview",
+            contentDescription = "Photo",
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .height(250.dp)
                 .clip(MaterialTheme.shapes.medium),
-            contentScale = ContentScale.Crop
-        )
-        
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = dateFormatter.format(Date(photo.dateTaken)),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            contentScale = ContentScale.Fit
         )
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        if (nearbyTors.isEmpty()) {
-            Text(
-                text = "No tors within 100m of this photo",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                Icons.Default.Event,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
             )
-        } else {
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Nearby tors",
+                text = sdf.format(Date(photo.dateTaken)),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        if (nearbyTors.isNotEmpty()) {
+            Text(
+                text = "Nearby Tors",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
+            
             Spacer(modifier = Modifier.height(8.dp))
+            
             LazyColumn(
-                modifier = Modifier.heightIn(max = 200.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                modifier = Modifier.heightIn(max = 200.dp)
             ) {
                 items(nearbyTors) { torWithDistance ->
-                    NearbyTorItem(
-                        torWithDistance = torWithDistance,
-                        onClick = { onTorSelected(torWithDistance.tor.id) }
+                    ListItem(
+                        headlineContent = { Text(torWithDistance.tor.name) },
+                        supportingContent = { 
+                            Text("${String.format(Locale.getDefault(), "%.2f", torWithDistance.distanceMeters / 1000.0)} km away") 
+                        },
+                        leadingContent = {
+                            Box(
+                                modifier = Modifier
+                                    .size(12.dp)
+                                    .background(Orange, CircleShape)
+                            )
+                        },
+                        modifier = Modifier.clickable { onTorClick(torWithDistance.tor.id) }
                     )
                 }
             }
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-            Text("Cancel")
-        }
-    }
-}
-
-@Composable
-private fun NearbyTorItem(
-    torWithDistance: TorWithDistance,
-    onClick: () -> Unit
-) {
-    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = torWithDistance.tor.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = "${torWithDistance.distanceMeters.toInt()}m away • ${torWithDistance.tor.heightMeters}m",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Icon(Icons.Default.Add, contentDescription = "Associate", tint = MaterialTheme.colorScheme.primary)
+        } else {
+            Text(
+                text = "No tors found nearby this photo location.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
