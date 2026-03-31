@@ -353,7 +353,7 @@ fun TorDetailSheet(
         tor.torsOfDartmoorURL?.let { url ->
             OutlinedButton(
                 onClick = {
-                    val urlWithUtm = "$url?utm_source=dartmoortorsapp-tordetail&medium=android"
+                    val urlWithUtm = "$url&utm_source=dartmoortorsapp-tordetail&utm_medium=android"
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(urlWithUtm))
                     context.startActivity(intent)
                 },
