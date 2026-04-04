@@ -287,14 +287,14 @@ fun TorDetailSheet(
                 Text("Remove from Bagged")
             }
         } else {
-            // Not visited: full width button "Bag this Tor"
+            // Not visited: full width button "Bag this tor"
             Button(
                 onClick = onMarkVisited,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(Icons.Default.Check, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Bag this Tor")
+                Text("Bag this tor")
             }
         }
 
