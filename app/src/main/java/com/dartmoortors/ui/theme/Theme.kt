@@ -78,7 +78,7 @@ private val DarkColorScheme = darkColorScheme(
 @Composable
 fun DartmoorTorsTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
+    // Dynamic color disabled - use Dartmoor palette instead
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -90,11 +90,12 @@ fun DartmoorTorsTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
-    
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
+            // Use Granite Base for dark theme status bar
             window.statusBarColor = colorScheme.surface.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
