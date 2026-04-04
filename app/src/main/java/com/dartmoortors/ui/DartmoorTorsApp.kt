@@ -33,7 +33,9 @@ fun DartmoorTorsApp() {
     
     Scaffold(
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surface
+            ) {
                 Screen.bottomNavItems.forEach { screen ->
                     val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
                     NavigationBarItem(
