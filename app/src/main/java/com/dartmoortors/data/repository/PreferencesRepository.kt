@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import com.dartmoortors.data.model.Classification
+import com.dartmoortors.data.model.CompendiumEdition
 import com.dartmoortors.data.model.TorCollection
 import com.dartmoortors.data.model.TorSortOption
 import javax.inject.Inject
@@ -31,6 +32,7 @@ class PreferencesRepository @Inject constructor(
         val MAP_TYPE = intPreferencesKey("map_type")
         val SHOW_PHOTOS_LAYER = booleanPreferencesKey("show_photos_layer")
         val SELECTED_COLLECTION_ID = stringPreferencesKey("selected_collection_id")
+        val SELECTED_COMPENDIUM_EDITION = stringPreferencesKey("selected_compendium_edition")
     }
     
     /**
@@ -46,6 +48,26 @@ class PreferencesRepository @Inject constructor(
         }
         .map { preferences ->
             preferences[PreferencesKeys.SELECTED_COLLECTION_ID] ?: TorCollection.DEFAULT_COLLECTION_ID
+        }
+
+    /**
+     * Get the selected compendium edition (defaults to 2nd edition).
+     */
+    val selectedCompendiumEdition: Flow<CompendiumEdition> = context.dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences ->
+            val value = preferences[PreferencesKeys.SELECTED_COMPENDIUM_EDITION]
+            if (value != null) {
+                CompendiumEdition.fromString(value) ?: CompendiumEdition.SECOND
+            } else {
+                CompendiumEdition.SECOND
+            }
         }
     
     /**
@@ -205,6 +227,15 @@ class PreferencesRepository @Inject constructor(
     suspend fun setSelectedCollectionId(collectionId: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.SELECTED_COLLECTION_ID] = collectionId
+        }
+    }
+
+    /**
+     * Update selected compendium edition.
+     */
+    suspend fun setSelectedCompendiumEdition(edition: CompendiumEdition) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SELECTED_COMPENDIUM_EDITION] = edition.jsonValue
         }
     }
 }

@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dartmoortors.data.model.Classification
+import com.dartmoortors.data.model.CompendiumEdition
 import com.dartmoortors.data.model.TorCollection
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,6 +35,7 @@ fun CollectionScreen(
     val collectionTorCounts by viewModel.collectionTorCounts.collectAsState()
     val progress by viewModel.progress.collectAsState()
     val hasSubFilters by viewModel.hasSubFilters.collectAsState()
+    val selectedCompendiumEdition by viewModel.selectedCompendiumEdition.collectAsState()
     val context = LocalContext.current
     
     Column(
@@ -164,7 +166,49 @@ fun CollectionScreen(
                 )
             }
         }
-        
+
+        // Compendium Edition Picker (only for compendium collection)
+        if (selectedCollectionId == "compendium") {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Edition",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    SingleChoiceSegmentedButtonRow(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        CompendiumEdition.entries.forEachIndexed { index, edition ->
+                            SegmentedButton(
+                                shape = SegmentedButtonDefaults.itemShape(
+                                    index = index,
+                                    count = CompendiumEdition.entries.size
+                                ),
+                                onClick = { viewModel.selectCompendiumEdition(edition) },
+                                selected = selectedCompendiumEdition == edition
+                            ) {
+                                Text(edition.displayName)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "The 2nd edition includes 5 additional tors not in the 1st edition.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+
         // Sub-filters Section (only for collections with hasSubFilters = true)
         if (hasSubFilters) {
             Spacer(modifier = Modifier.height(16.dp))

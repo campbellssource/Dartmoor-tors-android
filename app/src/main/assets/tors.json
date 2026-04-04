@@ -35,7 +35,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Aish Tor"
+    }
   },
   {
     "id": "aller-brook-tor",
@@ -90,7 +97,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Arch Tor"
+    }
   },
   {
     "id": "archerton-rocks",
@@ -128,7 +142,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Arms Tor"
+    }
   },
   {
     "id": "ash-tor",
@@ -286,7 +307,15 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "firstEditionName": "Bag Tor",
+      "secondEditionName": "Bagtor"
+    }
   },
   {
     "id": "bagga-tor",
@@ -305,7 +334,14 @@
       "os-map",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Bagga Tor"
+    }
   },
   {
     "id": "balls-wood-tor",
@@ -517,7 +553,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Beardown Tors"
+    }
   },
   {
     "id": "beardown-west-tor",
@@ -660,7 +703,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Bell Tor"
+    }
   },
   {
     "id": "bellever-rocks",
@@ -698,7 +748,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Bellever Tor"
+    }
   },
   {
     "id": "belstone-common-tor",
@@ -737,7 +794,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Belstone Tor"
+    }
   },
   {
     "id": "bennah-hill-tor",
@@ -789,8 +853,15 @@
     "collections": [
       "os-map",
       "public",
-      "tors-of-dartmoor"
-    ]
+      "tors-of-dartmoor",
+      "compendium"
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "2nd"
+      ],
+      "name": "Berra Tor"
+    }
   },
   {
     "id": "big-rock",
@@ -864,7 +935,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Birch Tor"
+    }
   },
   {
     "id": "black-hill-rocks",
@@ -992,7 +1070,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Black Tor - Avon"
+    }
   },
   {
     "id": "black-tor-butterdon",
@@ -1030,7 +1115,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Black Tor - Okement"
+    }
   },
   {
     "id": "black-tor-walkhampton",
@@ -1050,7 +1142,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Black Tor - Meavy"
+    }
   },
   {
     "id": "black-a-tor-boulders",
@@ -1142,7 +1241,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Blackadown Tor"
+    }
   },
   {
     "id": "blackalder-tor",
@@ -1287,8 +1393,15 @@
     "collections": [
       "os-map",
       "public",
-      "tors-of-dartmoor"
-    ]
+      "tors-of-dartmoor",
+      "compendium"
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "2nd"
+      ],
+      "name": "Blakey Tor"
+    }
   },
   {
     "id": "blue-trail-tor",
@@ -1433,7 +1546,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Boulters Tor"
+    }
   },
   {
     "id": "bovey-rock",
@@ -1593,8 +1713,15 @@
     "collections": [
       "os-map",
       "public",
-      "tors-of-dartmoor"
-    ]
+      "tors-of-dartmoor",
+      "compendium"
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "2nd"
+      ],
+      "name": "Braddon Tor"
+    }
   },
   {
     "id": "brake-tor",
@@ -1651,7 +1778,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Brat Tor"
+    }
   },
   {
     "id": "brent-fore-hill",
@@ -1744,7 +1878,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Brentor"
+    }
   },
   {
     "id": "bretts-tor",
@@ -2333,8 +2474,16 @@
     "classification": "Valley Side",
     "rockType": "Granite",
     "collections": [
-      "tors-of-dartmoor"
-    ]
+      "tors-of-dartmoor",
+      "compendium"
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Burrator"
+    }
   },
   {
     "id": "burrator-waterfall",
@@ -2497,7 +2646,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Calveslake Tor"
+    }
   },
   {
     "id": "canonteign-falls-rock",
@@ -2689,7 +2845,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Chat Tor"
+    }
   },
   {
     "id": "chaw-gully",
@@ -2763,7 +2926,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Chinkwell Tor"
+    }
   },
   {
     "id": "chittaford-down-rocks",
@@ -3102,7 +3272,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Collard Tor"
+    }
   },
   {
     "id": "combe-crags",
@@ -3158,7 +3335,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Combestone Tor"
+    }
   },
   {
     "id": "combshead-tor",
@@ -3178,7 +3362,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Combeshead Tor"
+    }
   },
   {
     "id": "common-wood-tor",
@@ -3233,7 +3424,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Conies Down Tor"
+    }
   },
   {
     "id": "coombe-down-tor",
@@ -3412,7 +3610,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Corndon Tor"
+    }
   },
   {
     "id": "cosdon-hill",
@@ -3538,7 +3743,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Cox Tor"
+    }
   },
   {
     "id": "cracker-stone",
@@ -3576,7 +3788,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Cramber Tor"
+    }
   },
   {
     "id": "creason-wood-tor",
@@ -3706,7 +3925,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Crockern Tor"
+    }
   },
   {
     "id": "croft-tor",
@@ -3744,7 +3970,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Crow Tor"
+    }
   },
   {
     "id": "crows-buttress",
@@ -3946,7 +4179,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Devil's Tor"
+    }
   },
   {
     "id": "dewerstone-hill",
@@ -4039,7 +4279,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Dinger Tor"
+    }
   },
   {
     "id": "doccombe-rock",
@@ -4077,7 +4324,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Doe Tor"
+    }
   },
   {
     "id": "dog-marsh-north-tor",
@@ -4168,7 +4422,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Down Tor"
+    }
   },
   {
     "id": "drewston-tor",
@@ -4325,8 +4586,16 @@
     "rockType": "Granite",
     "collections": [
       "public",
-      "tors-of-dartmoor"
-    ]
+      "tors-of-dartmoor",
+      "compendium"
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Bench Tor"
+    }
   },
   {
     "id": "eagle-rock-chase-wood",
@@ -4401,7 +4670,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Easdon Tor"
+    }
   },
   {
     "id": "east-dart-falls",
@@ -4439,7 +4715,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "East Mill Tor"
+    }
   },
   {
     "id": "east-ravens-tor",
@@ -4531,7 +4814,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Eastern Tor"
+    }
   },
   {
     "id": "easterndown-copse-tor",
@@ -4675,7 +4965,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Feather Tor"
+    }
   },
   {
     "id": "fernstone-tor",
@@ -4802,7 +5099,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Flat Tor"
+    }
   },
   {
     "id": "fleetwood-tor",
@@ -4858,7 +5162,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Foggintor"
+    }
   },
   {
     "id": "ford-rocks",
@@ -4916,7 +5227,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Fox Tor"
+    }
   },
   {
     "id": "fox-tor-mary-tavy",
@@ -5011,7 +5329,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Fur Tor"
+    }
   },
   {
     "id": "fur-tor-walkhampton",
@@ -5084,7 +5409,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Ger Tor"
+    }
   },
   {
     "id": "the-giants-marble",
@@ -5299,7 +5631,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Great Combe Tor"
+    }
   },
   {
     "id": "great-great-rough-tor",
@@ -5356,7 +5695,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Great Links Tor"
+    }
   },
   {
     "id": "great-lot-crags",
@@ -5394,7 +5740,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Great Mis Tor"
+    }
   },
   {
     "id": "great-parford-tor",
@@ -5504,7 +5857,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Great Staple Tor"
+    }
   },
   {
     "id": "great-stennent-tor",
@@ -5559,7 +5919,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Great Trowlesworthy Tor"
+    }
   },
   {
     "id": "great-warmpit-copse-tor",
@@ -5631,7 +5998,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Greator Rocks"
+    }
   },
   {
     "id": "green-combe-gorge",
@@ -5687,7 +6061,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Green Tor"
+    }
   },
   {
     "id": "greena-ball-rocks",
@@ -5725,7 +6106,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Gren Tor"
+    }
   },
   {
     "id": "grennawell",
@@ -5831,7 +6219,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Gutter Tor"
+    }
   },
   {
     "id": "halstock-cleave-tor",
@@ -5903,7 +6298,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Hameldown Tor"
+    }
   },
   {
     "id": "hamlyns-tor",
@@ -6050,7 +6452,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Hare Tor"
+    }
   },
   {
     "id": "hart-tor-okehampton-common",
@@ -6088,7 +6497,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Hart Tor"
+    }
   },
   {
     "id": "hartland-hill-rocks",
@@ -6125,7 +6541,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Hartland Tor"
+    }
   },
   {
     "id": "harton-chest",
@@ -6215,7 +6638,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Hawks' Tor"
+    }
   },
   {
     "id": "hawthorn-clitter",
@@ -6308,7 +6738,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Haytor Rocks"
+    }
   },
   {
     "id": "heckwood-tor",
@@ -6328,7 +6765,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Heckwood Tor"
+    }
   },
   {
     "id": "hedge-tor",
@@ -6346,8 +6790,15 @@
     "collections": [
       "os-map",
       "public",
-      "tors-of-dartmoor"
-    ]
+      "tors-of-dartmoor",
+      "compendium"
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "2nd"
+      ],
+      "name": "Hedge Tor"
+    }
   },
   {
     "id": "heltor-rock",
@@ -6366,7 +6817,14 @@
       "os-map",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Heltor Rock"
+    }
   },
   {
     "id": "hemstone-rocks",
@@ -6405,7 +6863,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Hen Tor"
+    }
   },
   {
     "id": "henchertraw",
@@ -6551,7 +7016,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "High Willhays"
+    }
   },
   {
     "id": "highbury-bridge-rocks",
@@ -6658,7 +7130,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Higher Hartor Tor"
+    }
   },
   {
     "id": "higher-hisley-tor",
@@ -6800,7 +7279,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Higher Tor"
+    }
   },
   {
     "id": "higher-trenchford-tor",
@@ -6854,7 +7340,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Higher White Tor"
+    }
   },
   {
     "id": "higher-woolholes",
@@ -6981,7 +7474,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Hockinston Tor"
+    }
   },
   {
     "id": "hole-rock",
@@ -7020,7 +7520,15 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "firstEditionName": "Hollow Tor - Walkham",
+      "secondEditionName": "Prince town"
+    }
   },
   {
     "id": "hollow-tor-widecombe",
@@ -7040,7 +7548,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Hollow Tor - Widecombe"
+    }
   },
   {
     "id": "hollowpark-rock",
@@ -7168,7 +7683,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Holwell Tor"
+    }
   },
   {
     "id": "holystreet-manor-cliff-face",
@@ -7259,7 +7781,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Honeybag Tor"
+    }
   },
   {
     "id": "hookney-tor",
@@ -7280,7 +7809,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Hookney Tor"
+    }
   },
   {
     "id": "horridge-common-rocks",
@@ -7353,7 +7889,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Hound Tor - Manaton"
+    }
   },
   {
     "id": "hound-tor-okehampton",
@@ -7373,7 +7916,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Hound Tor - Gallaven"
+    }
   },
   {
     "id": "hound-tor-down-outcrop",
@@ -7428,7 +7978,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Huccaby Tor"
+    }
   },
   {
     "id": "hucken-tor",
@@ -7448,7 +8005,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Hucken Tor"
+    }
   },
   {
     "id": "hunt-tor",
@@ -7468,7 +8032,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Hunt Tor"
+    }
   },
   {
     "id": "hunters-tor-castle-drogo",
@@ -7488,7 +8059,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Hunter's Tor (Castle Drogo)"
+    }
   },
   {
     "id": "hunters-tor-lustleigh",
@@ -7508,7 +8086,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Hunter\u2019s Tor - Bovey"
+    }
   },
   {
     "id": "the-hunters-stone",
@@ -7617,7 +8202,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Ingra Tor"
+    }
   },
   {
     "id": "inner-pupers",
@@ -7690,7 +8282,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Ivy Tor"
+    }
   },
   {
     "id": "jester-crags",
@@ -7814,7 +8413,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Kestor Rock"
+    }
   },
   {
     "id": "kiln-down-tor",
@@ -7851,7 +8457,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "King Tor"
+    }
   },
   {
     "id": "kings-barn-rocks",
@@ -7888,7 +8501,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "King's Tor"
+    }
   },
   {
     "id": "kings-wood-tor",
@@ -7997,7 +8617,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Kitty Tor"
+    }
   },
   {
     "id": "knack",
@@ -8262,7 +8889,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Laughter Tor"
+    }
   },
   {
     "id": "leather-tor",
@@ -8283,7 +8917,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Leather Tor"
+    }
   },
   {
     "id": "leeden-tor",
@@ -8303,7 +8944,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Leeden Tor"
+    }
   },
   {
     "id": "legis-tor",
@@ -8323,7 +8971,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Legis Tor"
+    }
   },
   {
     "id": "leigh-bridge-rocks",
@@ -8360,7 +9015,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Leigh Tor"
+    }
   },
   {
     "id": "leighon-tor",
@@ -8378,8 +9040,15 @@
     "collections": [
       "os-map",
       "public",
-      "tors-of-dartmoor"
-    ]
+      "tors-of-dartmoor",
+      "compendium"
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "2nd"
+      ],
+      "name": "Leighon"
+    }
   },
   {
     "id": "leign-valley-tor",
@@ -8486,7 +9155,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Lints Tor"
+    }
   },
   {
     "id": "lints-tor-hollow-rocks",
@@ -8524,7 +9200,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Littaford Tors"
+    }
   },
   {
     "id": "little-beardown-tor",
@@ -8686,7 +9369,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Little Combe Tor"
+    }
   },
   {
     "id": "little-combestone-tor",
@@ -8976,7 +9666,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Little Hound Tor"
+    }
   },
   {
     "id": "little-kings-tor",
@@ -9051,7 +9748,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Little Links Tor"
+    }
   },
   {
     "id": "little-longaford-tor",
@@ -9107,7 +9811,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Little Mis Tor"
+    }
   },
   {
     "id": "little-nutcracker",
@@ -9253,7 +9964,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Little Staple Tor"
+    }
   },
   {
     "id": "little-tor",
@@ -9325,7 +10043,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Little Trowlesworthy Tor"
+    }
   },
   {
     "id": "little-vag-tor",
@@ -9625,7 +10350,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Longaford Tor"
+    }
   },
   {
     "id": "longash-tor",
@@ -9679,7 +10411,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Longtimber Tor"
+    }
   },
   {
     "id": "lord-mayors-castle",
@@ -9913,7 +10652,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Lower Hartor Tor"
+    }
   },
   {
     "id": "lower-hisley-tor",
@@ -10198,7 +10944,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Lower White Tor"
+    }
   },
   {
     "id": "lower-woolholes",
@@ -10289,7 +11042,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Luckey Tor"
+    }
   },
   {
     "id": "lukes-tor",
@@ -10434,7 +11194,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Lydford Tor"
+    }
   },
   {
     "id": "lynch-tor",
@@ -10454,7 +11221,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Lynch Tor"
+    }
   },
   {
     "id": "maiden-tor",
@@ -10673,7 +11447,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Mel Tor"
+    }
   },
   {
     "id": "meldon-hill-east-tor",
@@ -10923,7 +11704,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Middle Staple Tor"
+    }
   },
   {
     "id": "middle-stonelands-tor",
@@ -10960,7 +11748,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Middle Tor"
+    }
   },
   {
     "id": "middle-vag-tor",
@@ -11172,7 +11967,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Nat Tor"
+    }
   },
   {
     "id": "nattadon-common",
@@ -11425,7 +12227,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "North Hessary Tor"
+    }
   },
   {
     "id": "north-park-tor",
@@ -11531,7 +12340,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Oke Tor"
+    }
   },
   {
     "id": "old-hill-rocks",
@@ -11888,7 +12704,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Pew Tor"
+    }
   },
   {
     "id": "picket-rock",
@@ -11926,7 +12749,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Pil Tor"
+    }
   },
   {
     "id": "pinchaford-ball-tor",
@@ -12317,7 +13147,14 @@
       "os-map",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Raven\u2019s Tor"
+    }
   },
   {
     "id": "rectory-tor",
@@ -12424,7 +13261,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Rippator"
+    }
   },
   {
     "id": "rippon-tor",
@@ -12445,7 +13289,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Rippon Tor"
+    }
   },
   {
     "id": "roborough-rock",
@@ -12535,7 +13386,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Rook Tor"
+    }
   },
   {
     "id": "rookery-brook-tor",
@@ -12589,7 +13447,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Roos Tor"
+    }
   },
   {
     "id": "rose-cottage-lower-rock",
@@ -12679,8 +13544,16 @@
     "collections": [
       "os-map",
       "public",
-      "tors-of-dartmoor"
-    ]
+      "tors-of-dartmoor",
+      "compendium"
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Rough Tor"
+    }
   },
   {
     "id": "rough-tor-rock",
@@ -12826,7 +13699,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Rowtor"
+    }
   },
   {
     "id": "royal-tor",
@@ -12918,7 +13798,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Rundlestone Tor"
+    }
   },
   {
     "id": "rushford-tor",
@@ -13010,7 +13897,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Saddle Tor"
+    }
   },
   {
     "id": "sampford-tor",
@@ -13135,7 +14029,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Scarey Tor"
+    }
   },
   {
     "id": "scatter-rock",
@@ -13191,7 +14092,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Scorhill Tor"
+    }
   },
   {
     "id": "seamans-borough-rocks",
@@ -13282,7 +14190,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Shapley Tor"
+    }
   },
   {
     "id": "shaptor-rock",
@@ -13320,7 +14235,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Sharp tor -Teign"
+    }
   },
   {
     "id": "sharp-tor-chinkwell",
@@ -13359,7 +14281,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Sharp Tor - Erme"
+    }
   },
   {
     "id": "sharp-tor-lydford",
@@ -13379,7 +14308,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Sharp Tor - Lyd"
+    }
   },
   {
     "id": "sharp-tor-peter-tavy",
@@ -13432,8 +14368,16 @@
     "collections": [
       "os-map",
       "public",
-      "tors-of-dartmoor"
-    ]
+      "tors-of-dartmoor",
+      "compendium"
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Sharp tor - Dart"
+    }
   },
   {
     "id": "sharpitor-lustleigh",
@@ -13454,7 +14398,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Sharpitor - Bovey"
+    }
   },
   {
     "id": "sharpitor-walkhampton",
@@ -13474,7 +14425,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Sharpitor - Meavy"
+    }
   },
   {
     "id": "shaugh-beacon",
@@ -13530,7 +14488,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Shavercombe Tor"
+    }
   },
   {
     "id": "sheeps-tor",
@@ -13550,7 +14515,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Sheeps Tor"
+    }
   },
   {
     "id": "shell-top",
@@ -13589,7 +14561,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Shelstone Tor"
+    }
   },
   {
     "id": "shillyrock",
@@ -13626,7 +14605,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Shilstone Tor"
+    }
   },
   {
     "id": "shipley-gorge",
@@ -13664,7 +14650,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Shipley Tor"
+    }
   },
   {
     "id": "shovel-stone",
@@ -13775,7 +14768,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Sittaford Tor"
+    }
   },
   {
     "id": "ska-rocks",
@@ -14027,7 +15027,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Sourton Tors"
+    }
   },
   {
     "id": "south-bench-tor",
@@ -14137,7 +15144,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "South Hessary Tor"
+    }
   },
   {
     "id": "south-lodes-gully",
@@ -14388,7 +15402,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Stannon Tor"
+    }
   },
   {
     "id": "steeperton-gorge-rocks",
@@ -14444,7 +15465,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Steeperton Tor"
+    }
   },
   {
     "id": "steng-a-tor",
@@ -14464,7 +15492,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Steng-a-Tor"
+    }
   },
   {
     "id": "stennent-rocks",
@@ -14643,7 +15678,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Stonetor Hill"
+    }
   },
   {
     "id": "stonelands-north-tor",
@@ -14802,7 +15844,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Swelltor"
+    }
   },
   {
     "id": "tanglewood-tor",
@@ -14985,7 +16034,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Thornworthy Tor"
+    }
   },
   {
     "id": "three-barrows-tor",
@@ -15042,7 +16098,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Top Tor"
+    }
   },
   {
     "id": "tor-rocks",
@@ -15690,7 +16753,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Watern Tor"
+    }
   },
   {
     "id": "webburn-gap-east",
@@ -15798,8 +16868,16 @@
     "collections": [
       "os-map",
       "public",
-      "tors-of-dartmoor"
-    ]
+      "tors-of-dartmoor",
+      "compendium"
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Welstor Rock"
+    }
   },
   {
     "id": "west-cleave-gorge",
@@ -15891,7 +16969,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "West Mill Tor"
+    }
   },
   {
     "id": "west-rough-tor",
@@ -16160,7 +17245,14 @@
       "compendium",
       "rock-idols",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "White Tor"
+    }
   },
   {
     "id": "whitehill-tor",
@@ -16308,7 +17400,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Wild Tor"
+    }
   },
   {
     "id": "wild-tor-clitter",
@@ -16434,7 +17533,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Wind Tor"
+    }
   },
   {
     "id": "winneys-down-logan-stone",
@@ -16472,7 +17578,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Winter Tor"
+    }
   },
   {
     "id": "winterlear-tor",
@@ -16772,7 +17885,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Yar Tor"
+    }
   },
   {
     "id": "yealm-rocks",
@@ -16846,7 +17966,14 @@
       "public",
       "compendium",
       "tors-of-dartmoor"
-    ]
+    ],
+    "compendiumInfo": {
+      "editions": [
+        "1st",
+        "2nd"
+      ],
+      "name": "Yes Tor"
+    }
   },
   {
     "id": "yes-tor-walkhampton",

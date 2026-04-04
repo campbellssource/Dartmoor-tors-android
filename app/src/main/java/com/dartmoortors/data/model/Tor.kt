@@ -3,6 +3,47 @@ package com.dartmoortors.data.model
 import com.google.gson.annotations.SerializedName
 
 /**
+ * Compendium edition - 1st or 2nd edition of the Dartmoor Compendium.
+ */
+enum class CompendiumEdition(val displayName: String, val jsonValue: String) {
+    FIRST("1st Edition", "1st"),
+    SECOND("2nd Edition", "2nd");
+
+    companion object {
+        fun fromString(value: String): CompendiumEdition? {
+            return entries.find { it.jsonValue == value }
+        }
+    }
+}
+
+/**
+ * Information about a tor's inclusion in the Dartmoor Compendium.
+ */
+data class CompendiumInfo(
+    val editions: List<String>,
+    val name: String? = null,
+    val firstEditionName: String? = null,
+    val secondEditionName: String? = null
+) {
+    /**
+     * Returns true if this tor is in the specified edition.
+     */
+    fun isInEdition(edition: CompendiumEdition): Boolean {
+        return editions.contains(edition.jsonValue)
+    }
+
+    /**
+     * Returns the display name for a specific edition.
+     */
+    fun nameFor(edition: CompendiumEdition): String? {
+        return when (edition) {
+            CompendiumEdition.FIRST -> firstEditionName ?: name
+            CompendiumEdition.SECOND -> secondEditionName ?: name
+        }
+    }
+}
+
+/**
  * Represents a tor from the bundled JSON data.
  */
 data class Tor(
@@ -22,7 +63,8 @@ data class Tor(
     val torsOfDartmoorURL: String?,
     @SerializedName("wikipediaURL")
     val wikipediaURL: String?,
-    val collections: List<String> = emptyList()
+    val collections: List<String> = emptyList(),
+    val compendiumInfo: CompendiumInfo? = null
 ) {
     // Cached enum values - computed once per access, stored in transient fields
     // Note: Can't use `by lazy` with Gson deserialization
@@ -55,6 +97,13 @@ data class Tor(
      */
     fun isInCollection(collectionId: String): Boolean {
         return collections.contains(collectionId)
+    }
+
+    /**
+     * Returns true if this tor is in the specified compendium edition.
+     */
+    fun isInCompendiumEdition(edition: CompendiumEdition): Boolean {
+        return compendiumInfo?.isInEdition(edition) ?: false
     }
 }
 

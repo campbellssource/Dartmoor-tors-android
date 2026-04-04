@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import com.dartmoortors.data.model.Classification
+import com.dartmoortors.data.model.CompendiumEdition
 import com.dartmoortors.data.model.TorCollection
 import com.dartmoortors.data.model.Tor
 import com.dartmoortors.data.model.TorWithVisitState
@@ -64,6 +65,13 @@ class CollectionViewModel @Inject constructor(
     val accessibleOnly: StateFlow<Boolean> = preferencesRepository
         .accessibleOnly
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    /**
+     * The currently selected compendium edition (defaults to 2nd edition).
+     */
+    val selectedCompendiumEdition: StateFlow<CompendiumEdition> = preferencesRepository
+        .selectedCompendiumEdition
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CompendiumEdition.SECOND)
     
     val tors: StateFlow<List<Tor>> = torRepository.tors
     
@@ -97,32 +105,46 @@ class CollectionViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
     
     /**
-     * Filtered tors based on collection, classification, and access filters.
+     * Filtered tors based on collection, classification, compendium edition, and access filters.
      * Uses collections directly to compute hasSubFilters inline, avoiding race conditions.
      */
     val filteredTors: StateFlow<List<Tor>> = combine(
-        torRepository.tors,
-        collections,
-        selectedCollectionId,
-        enabledClassifications,
-        accessibleOnly
-    ) { tors, collectionsList, collectionId, classifications, accessibleOnly ->
+        combine(
+            torRepository.tors,
+            collections,
+            selectedCollectionId
+        ) { tors, collectionsList, collectionId ->
+            Triple(tors, collectionsList, collectionId)
+        },
+        combine(
+            enabledClassifications,
+            accessibleOnly,
+            selectedCompendiumEdition
+        ) { classifications, accessible, edition ->
+            Triple(classifications, accessible, edition)
+        }
+    ) { (tors, collectionsList, collectionId), (classifications, accessibleOnly, compendiumEdition) ->
         // Compute hasSubFilters directly from collections to ensure synchronization
         val hasSubFilters = collectionsList.find { it.id == collectionId }?.hasSubFilters ?: false
-        
+
         tors.filter { tor ->
             // Must be in selected collection
             if (!tor.isInCollection(collectionId)) return@filter false
-            
-            // Apply classification filter only if collection has sub-filters
-            if (hasSubFilters) {
+
+            // Apply classification filter only if collection has sub-filters (tors-of-dartmoor)
+            if (hasSubFilters && collectionId == "tors-of-dartmoor") {
                 val classification = Classification.fromString(tor.classification)
                 if (!classifications.contains(classification)) return@filter false
             }
-            
+
+            // Apply compendium edition filter for compendium collection
+            if (collectionId == "compendium") {
+                if (!tor.isInCompendiumEdition(compendiumEdition)) return@filter false
+            }
+
             // Apply access filter
             if (accessibleOnly && !tor.isAccessible) return@filter false
-            
+
             true
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -214,6 +236,15 @@ class CollectionViewModel @Inject constructor(
     fun setAccessibleOnly(accessibleOnly: Boolean) {
         viewModelScope.launch {
             preferencesRepository.setAccessibleOnly(accessibleOnly)
+        }
+    }
+
+    /**
+     * Select a compendium edition.
+     */
+    fun selectCompendiumEdition(edition: CompendiumEdition) {
+        viewModelScope.launch {
+            preferencesRepository.setSelectedCompendiumEdition(edition)
         }
     }
 }
