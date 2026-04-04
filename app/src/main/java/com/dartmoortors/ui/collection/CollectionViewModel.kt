@@ -93,12 +93,23 @@ class CollectionViewModel @Inject constructor(
     
     /**
      * Count of tors per collection.
+     * For compendium collection, uses the selected edition (defaults to 2nd).
      */
-    val collectionTorCounts: StateFlow<Map<String, Int>> = torRepository.tors.map { tors ->
+    val collectionTorCounts: StateFlow<Map<String, Int>> = combine(
+        torRepository.tors,
+        selectedCompendiumEdition
+    ) { tors, compendiumEdition ->
         val counts = mutableMapOf<String, Int>()
         tors.forEach { tor ->
             tor.collections.forEach { collectionId ->
-                counts[collectionId] = (counts[collectionId] ?: 0) + 1
+                // For compendium collection, only count if tor is in the selected edition
+                if (collectionId == "compendium") {
+                    if (tor.isInCompendiumEdition(compendiumEdition)) {
+                        counts[collectionId] = (counts[collectionId] ?: 0) + 1
+                    }
+                } else {
+                    counts[collectionId] = (counts[collectionId] ?: 0) + 1
+                }
             }
         }
         counts
