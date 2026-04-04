@@ -140,7 +140,7 @@ private fun VisitedTorListItem(
         leadingContent = {
             Icon(
                 imageVector = Icons.Default.CheckCircle,
-                contentDescription = null,
+                contentDescription = "Visited",
                 tint = color
             )
         },

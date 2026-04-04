@@ -449,7 +449,7 @@ fun TorDetailSheet(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = collections.map { collectionDisplayName(it) }.joinToString(", "),
+                text = collections.map { collectionDisplayName(it) }.distinct().sorted().joinToString(", "),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

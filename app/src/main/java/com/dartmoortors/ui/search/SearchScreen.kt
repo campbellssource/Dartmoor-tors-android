@@ -184,7 +184,7 @@ private fun TorListItem(
         leadingContent = {
             Icon(
                 imageVector = if (torWithState.isVisited) Icons.Default.CheckCircle else Icons.Default.Place,
-                contentDescription = null,
+                contentDescription = if (torWithState.isVisited) "Visited" else null,
                 tint = color
             )
         },

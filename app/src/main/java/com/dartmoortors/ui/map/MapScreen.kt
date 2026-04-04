@@ -228,8 +228,18 @@ fun MapScreen(
                             modifier = Modifier
                                 .size(16.dp)
                                 .background(color, CircleShape)
-                                .border(1.dp, Color.White, CircleShape)
-                        )
+                                .border(1.dp, Color.White, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (item.isVisited) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(10.dp),
+                                    tint = Color.White
+                                )
+                            }
+                        }
                     }
                 )
 
@@ -275,8 +285,18 @@ fun MapScreen(
                             modifier = Modifier
                                 .size(16.dp)
                                 .background(color, CircleShape)
-                                .border(1.dp, Color.White, CircleShape)
-                        )
+                                .border(1.dp, Color.White, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (item.isVisited) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(10.dp),
+                                    tint = Color.White
+                                )
+                            }
+                        }
                     }
                 }
 
