@@ -64,6 +64,10 @@ class PhotosViewModel @Inject constructor(
     fun getRequiredPhotoPermission(): String {
         return photoService.getRequiredPhotoPermission()
     }
+
+    fun getRequiredPhotoPermissions(): Array<String> {
+        return photoService.getRequiredPhotoPermissions()
+    }
     
     /**
      * Start scanning the photo library for matches.

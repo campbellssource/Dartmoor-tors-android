@@ -33,13 +33,17 @@ fun PhotosScreen(
 ) {
     val scanState by viewModel.scanState.collectAsState()
     val hasPermission by viewModel.hasPhotoPermission.collectAsState()
-    
-    // Permission launcher
+
+    // Permission launcher for multiple permissions (photo access + media location)
     val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { granted ->
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
         viewModel.checkPhotoPermission()
-        if (granted) {
+        // Start scan if photo permission was granted (location permission may be optional)
+        val hasPhotoAccess = permissions.entries.any { (permission, granted) ->
+            granted && (permission.contains("READ_MEDIA") || permission.contains("READ_EXTERNAL"))
+        }
+        if (hasPhotoAccess) {
             viewModel.startScan()
         }
     }
@@ -51,7 +55,7 @@ fun PhotosScreen(
                 if (hasPermission) {
                     viewModel.startScan()
                 } else {
-                    permissionLauncher.launch(viewModel.getRequiredPhotoPermission())
+                    permissionLauncher.launch(viewModel.getRequiredPhotoPermissions())
                 }
             }
         )
