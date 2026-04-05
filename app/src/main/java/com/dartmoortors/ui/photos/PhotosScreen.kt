@@ -150,34 +150,6 @@ private fun ReadyView(
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Photos on Map section
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Map,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Photos on Map",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Use the layers button on the Map tab to show photos on the map. Tap a photo marker to see nearby tors.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
         // Local photos note
         Card(
             modifier = Modifier.fillMaxWidth(),
