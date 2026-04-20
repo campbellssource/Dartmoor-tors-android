@@ -58,6 +58,7 @@ fun MapScreen(
 ) {
     val context = LocalContext.current
     val clusterItems by viewModel.clusterItems.collectAsState()
+    val selectedCollectionId by viewModel.selectedCollectionId.collectAsState()
     val selectedTor by viewModel.selectedTor.collectAsState()
     val mapType by viewModel.mapType.collectAsState()
     val cameraTarget by viewModel.cameraTarget.collectAsState()
@@ -187,6 +188,9 @@ fun MapScreen(
             )
         ) {
             // Conditional clustering: only cluster when there are more than 270 tors
+            // key() forces complete rebuild of Clustering when collection changes,
+            // preventing stale spatial index issues in ClusterManager
+            key(selectedCollectionId) {
             if (clusterItems.size > 270) {
                 // OPTIMIZED: Marker Clustering for large collections
                 // This groups markers together when zoomed out, significantly improving panning performance.
@@ -320,6 +324,7 @@ fun MapScreen(
                     }
                 }
             }
+            } // end key(selectedCollectionId)
 
             // Compass line of sight
             if (showCompassLine && currentLocation != null && hasLocationPermission) {
