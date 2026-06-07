@@ -48,5 +48,15 @@
     "url": "https://uk.bookshop.org/a/17063/9781910636534",
     "hasSubFilters": false,
     "sortOrder": 4
+  },
+  {
+    "id": "max-piper",
+    "name": "Max Piper's Lesser-Known Tors and Rocks",
+    "description": "300 tors from Max Piper's East Dartmoor Lesser-Known Tors and Rocks.",
+    "introduction": "",
+    "imageAsset": null,
+    "url": "https://torbagger.torbagger.co.uk/p/shop.html&utm_source=dartmoortorsapp",
+    "hasSubFilters": false,
+    "sortOrder": 5
   }
 ]
