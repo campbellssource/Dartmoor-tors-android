@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Internal app storage for photos captured in-app via the camera (T1-02).
+         Exposed through the FileProvider so the system camera app can write the
+         capture, and so Coil can read it back for display. -->
+    <files-path name="tor_photos" path="photos/" />
+</paths>

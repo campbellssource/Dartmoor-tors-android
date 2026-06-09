@@ -3,7 +3,9 @@ package com.dartmoortors.ui.components
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -27,6 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.request.CachePolicy
@@ -34,6 +37,7 @@ import coil.request.ImageRequest
 import com.dartmoortors.data.model.Access
 import com.dartmoortors.data.model.TorWithVisitState
 import com.dartmoortors.ui.theme.Orange
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -77,7 +81,50 @@ fun TorDetailSheet(
             onPhotoSelected(it)
         }
     }
-    
+
+    // Camera capture launcher (T1-02). Captures to an app-private file exposed via a
+    // FileProvider; on success the same onPhotoSelected callback used by the gallery
+    // picker attaches it to the tor, so both sources are stored identically.
+    var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) pendingCameraUri?.let { onPhotoSelected(it) }
+        pendingCameraUri = null
+    }
+
+    // Controls the "Take Photo / Choose from Gallery" source chooser.
+    var showPhotoSourceDialog by remember { mutableStateOf(false) }
+
+    val launchGallery: () -> Unit = {
+        photoPickerLauncher.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+        )
+    }
+    val launchCamera: () -> Unit = {
+        val uri = createImageCaptureUri(context)
+        pendingCameraUri = uri
+        // Grant every camera app write access to the capture URI. TakePicture passes
+        // the URI via EXTRA_OUTPUT (not intent data), so the system doesn't auto-grant
+        // it on all OEMs — without this the capture can silently fail.
+        val captureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        context.packageManager
+            .queryIntentActivities(captureIntent, PackageManager.MATCH_DEFAULT_ONLY)
+            .forEach { resolveInfo ->
+                context.grantUriPermission(
+                    resolveInfo.activityInfo.packageName,
+                    uri,
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+        try {
+            cameraLauncher.launch(uri)
+        } catch (e: ActivityNotFoundException) {
+            pendingCameraUri = null
+            Toast.makeText(context, "No camera app available", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     // Track image loading state
     var imageLoadState by remember { mutableStateOf<AsyncImagePainter.State?>(null) }
     
@@ -132,11 +179,7 @@ fun TorDetailSheet(
                     // Error state - show broken photo indicator
                     if (imageLoadState is AsyncImagePainter.State.Error) {
                         BrokenPhotoIndicator(
-                            onReplaceClick = {
-                                photoPickerLauncher.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                )
-                            },
+                            onReplaceClick = { showPhotoSourceDialog = true },
                             onRemoveClick = onPhotoRemoved
                         )
                     } else {
@@ -159,11 +202,7 @@ fun TorDetailSheet(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             FilledTonalIconButton(
-                                onClick = {
-                                    photoPickerLauncher.launch(
-                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                    )
-                                }
+                                onClick = { showPhotoSourceDialog = true }
                             ) {
                                 Icon(Icons.Default.Edit, contentDescription = "Change photo")
                             }
@@ -175,11 +214,7 @@ fun TorDetailSheet(
                 } else {
                     // No photo - show add prompt
                     AddPhotoPrompt(
-                        onClick = {
-                            photoPickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        }
+                        onClick = { showPhotoSourceDialog = true }
                     )
                 }
             }
@@ -495,6 +530,35 @@ fun TorDetailSheet(
         }
     }
     
+    // Photo source chooser (T1-02): take a new photo or pick from the gallery.
+    if (showPhotoSourceDialog) {
+        AlertDialog(
+            onDismissRequest = { showPhotoSourceDialog = false },
+            title = { Text("Add photo") },
+            text = { Text("Take a new photo or choose one from your gallery.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showPhotoSourceDialog = false
+                    launchCamera()
+                }) {
+                    Icon(Icons.Default.PhotoCamera, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Take Photo")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showPhotoSourceDialog = false
+                    launchGallery()
+                }) {
+                    Icon(Icons.Default.PhotoLibrary, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Gallery")
+                }
+            }
+        )
+    }
+
     // Date picker dialog
     if (showDatePicker) {
         DatePickerDialog(
@@ -551,6 +615,20 @@ private fun openOsMaps(context: Context, latitude: Double, longitude: Double) {
             Toast.makeText(context, "Couldn't open OS Maps", Toast.LENGTH_SHORT).show()
         }
     }
+}
+
+/**
+ * Create a FileProvider content URI for a new in-app camera capture (T1-02).
+ *
+ * Captures are written to app-private internal storage (filesDir/photos), which the app
+ * owns — so the photo survives restarts, needs no storage permission, and is read back by
+ * Coil through the same FileProvider authority. The system camera app is granted temporary
+ * write access to this URI by the TakePicture contract.
+ */
+private fun createImageCaptureUri(context: Context): Uri {
+    val dir = File(context.filesDir, "photos").apply { mkdirs() }
+    val file = File(dir, "tor_${System.currentTimeMillis()}.jpg")
+    return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
 }
 
 /**
