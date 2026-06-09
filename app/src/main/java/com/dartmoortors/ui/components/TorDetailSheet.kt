@@ -1,7 +1,10 @@
 package com.dartmoortors.ui.components
 
+import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -81,6 +84,13 @@ fun TorDetailSheet(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            // Inset the scroll *viewport* above the system navigation bar so no
+            // content rests behind it at any scroll position (incl. the partial
+            // detent on first open). Must come BEFORE verticalScroll — placed
+            // after, the inset lands inside the scroll content and only pads the
+            // very end, leaving mid-scroll content (e.g. the Edit button) behind
+            // the nav bar. Mirrors the map screen's inset handling.
+            .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
     ) {
         // Hero Photo Section (only visible for visited tors)
@@ -316,11 +326,7 @@ fun TorDetailSheet(
                 style = MaterialTheme.typography.bodyLarge
             )
             TextButton(
-                onClick = {
-                    val uri = Uri.parse("https://osmaps.com/map?lat=${tor.latitude}&lon=${tor.longitude}&zoom=16")
-                    val intent = Intent(Intent.ACTION_VIEW, uri)
-                    context.startActivity(intent)
-                }
+                onClick = { openOsMaps(context, tor.latitude, tor.longitude) }
             ) {
                 Text("OS Maps")
             }
@@ -510,6 +516,39 @@ fun TorDetailSheet(
             }
         ) {
             DatePicker(state = datePickerState)
+        }
+    }
+}
+
+private const val OS_MAPS_PACKAGE = "uk.co.ordnancesurvey.osmaps"
+
+/**
+ * Open the given coordinates in OS Maps (T1-03).
+ *
+ * Root cause of the original bug: Android was using an incorrect URL
+ * (`https://osmaps.com/map?lat=...`) that is neither the OS Maps app's deep-link scheme
+ * nor its current web format, so the system just opened a browser on the wrong page.
+ *
+ * Fix: mirror the (working) iOS implementation in TorPlaceCard.openInOSMaps():
+ *   - App deep link via the custom scheme: osmaps://{lat},{lon},{zoom}/pin
+ *   - Web fallback (newer format):         https://explore.osmaps.com/pin?pinCoordinates={lat},{lon}
+ *
+ * We target the OS Maps package explicitly on the app intent (requires the <queries> entry
+ * in the manifest for Android 11+ visibility); if the app isn't installed / can't handle
+ * the scheme, we fall back to the web URL in a browser.
+ */
+private fun openOsMaps(context: Context, latitude: Double, longitude: Double) {
+    val appUri = Uri.parse("osmaps://$latitude,$longitude,16/pin")
+    val webUri = Uri.parse("https://explore.osmaps.com/pin?pinCoordinates=$latitude,$longitude")
+    val appIntent = Intent(Intent.ACTION_VIEW, appUri).setPackage(OS_MAPS_PACKAGE)
+    try {
+        context.startActivity(appIntent)
+    } catch (e: ActivityNotFoundException) {
+        // OS Maps app not installed (or doesn't handle the scheme) -> open the web map.
+        try {
+            context.startActivity(Intent(Intent.ACTION_VIEW, webUri))
+        } catch (e2: ActivityNotFoundException) {
+            Toast.makeText(context, "Couldn't open OS Maps", Toast.LENGTH_SHORT).show()
         }
     }
 }

@@ -18,6 +18,12 @@
     <!-- Access photo location metadata (for finding photos near tors) -->
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
 
+    <!-- Package visibility (Android 11+): allow targeting the OS Maps app directly
+         so "Open in OS Maps" can route to the app instead of a browser (T1-03). -->
+    <queries>
+        <package android:name="uk.co.ordnancesurvey.osmaps" />
+    </queries>
+
     <application
         android:name=".DartmoorTorsApplication"
         android:allowBackup="true"
