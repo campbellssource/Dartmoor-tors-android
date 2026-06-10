@@ -1,32 +1,30 @@
 package com.dartmoortors.ui.map
 
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.clustering.ClusterItem
 import com.dartmoortors.data.model.TorWithVisitState
 
 /**
- * Optimized ClusterItem for Tors to enable marker clustering.
+ * Lightweight model for a single tor pin on the map.
+ *
+ * Holds only the fields the marker layer needs, with a value-based equals/hashCode so
+ * StateFlow can skip emissions when nothing visible changed. (Previously implemented
+ * ClusterItem for marker clustering, which was removed in T2-04.)
  */
-class TorClusterItem(
+class TorMapItem(
     val torWithState: TorWithVisitState
-) : ClusterItem {
-    override fun getPosition(): LatLng = LatLng(torWithState.tor.latitude, torWithState.tor.longitude)
-    override fun getTitle(): String = torWithState.tor.name
-    override fun getSnippet(): String? = null
-    override fun getZIndex(): Float? = null
-
-    // Stable ID for the item to prevent flashing
+) {
     val id: String = torWithState.tor.id
-
-    // Visited state for icon selection
+    val position: LatLng = LatLng(torWithState.tor.latitude, torWithState.tor.longitude)
+    val title: String = torWithState.tor.name
     val isVisited: Boolean = torWithState.isVisited
     val isAccessible: Boolean = torWithState.tor.isAccessible
     val isInActiveCollection: Boolean = torWithState.isInActiveCollection
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is TorClusterItem) return false
-        return id == other.id && isVisited == other.isVisited && isAccessible == other.isAccessible && isInActiveCollection == other.isInActiveCollection
+        if (other !is TorMapItem) return false
+        return id == other.id && isVisited == other.isVisited &&
+            isAccessible == other.isAccessible && isInActiveCollection == other.isInActiveCollection
     }
 
     override fun hashCode(): Int {

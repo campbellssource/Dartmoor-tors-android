@@ -175,10 +175,10 @@ class MapViewModel @Inject constructor(
     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     /**
-     * Map markers as ClusterItems for efficient rendering.
+     * Tor pins for the map marker layer.
      */
-    val clusterItems: StateFlow<List<TorClusterItem>> = filteredTors
-        .map { tors -> tors.map { TorClusterItem(it) } }
+    val mapItems: StateFlow<List<TorMapItem>> = filteredTors
+        .map { tors -> tors.map { TorMapItem(it) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     
     /**

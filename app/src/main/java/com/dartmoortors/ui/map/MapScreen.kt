@@ -4,13 +4,9 @@ import android.Manifest
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -22,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -33,17 +28,13 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
-import com.google.maps.android.compose.clustering.Clustering
 import com.dartmoortors.data.model.Access
 import com.dartmoortors.data.model.Photo
 import com.dartmoortors.data.model.TorWithVisitState
 import com.dartmoortors.data.repository.TorWithDistance
 import com.dartmoortors.ui.components.TorDetailSheet
 import com.dartmoortors.ui.map.TrackingMode
-import com.dartmoortors.ui.theme.Green
-import com.dartmoortors.ui.theme.Orange
 import com.dartmoortors.ui.theme.Purple
-import com.dartmoortors.ui.theme.Teal
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.max
@@ -57,8 +48,7 @@ fun MapScreen(
     onTorSelected: (String) -> Unit
 ) {
     val context = LocalContext.current
-    val clusterItems by viewModel.clusterItems.collectAsState()
-    val selectedCollectionId by viewModel.selectedCollectionId.collectAsState()
+    val mapItems by viewModel.mapItems.collectAsState()
     val selectedTor by viewModel.selectedTor.collectAsState()
     val mapType by viewModel.mapType.collectAsState()
     val cameraTarget by viewModel.cameraTarget.collectAsState()
@@ -187,144 +177,42 @@ fun MapScreen(
                 compassEnabled = true
             )
         ) {
-            // Conditional clustering: only cluster when there are more than 270 tors
-            // key() forces complete rebuild of Clustering when collection changes,
-            // preventing stale spatial index issues in ClusterManager
-            key(selectedCollectionId) {
-            if (clusterItems.size > 270) {
-                // OPTIMIZED: Marker Clustering for large collections
-                // This groups markers together when zoomed out, significantly improving panning performance.
-                Clustering(
-                    items = clusterItems,
-                    onClusterItemClick = { item ->
-                        onTorSelected(item.id)
-                        true
-                    },
-                    clusterContent = { cluster ->
-                        // Custom cluster appearance (Circle with count)
-                        Surface(
-                            modifier = Modifier.size(40.dp),
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                            tonalElevation = 4.dp,
-                            shadowElevation = 4.dp
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text(
-                                    text = cluster.size.toString(),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                    },
-                    clusterItemContent = { item ->
-                        // Custom individual marker appearance - simple circle
-                        val color = when {
-                            !item.isInActiveCollection -> Color.Gray
-                            item.isVisited -> Green
-                            item.isAccessible -> Teal
-                            else -> Orange
-                        }
-                        Box(
-                            modifier = Modifier
-                                .size(16.dp)
-                                .background(color, CircleShape)
-                                .border(1.dp, Color.White, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (item.isVisited) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(10.dp),
-                                    tint = Color.White
-                                )
-                            }
-                        }
-                    }
-                )
-
-                // Show selected tor with grey marker if it's not in the active collection
-                selectedTor?.let { torWithState ->
-                    if (!torWithState.isInActiveCollection) {
-                        MarkerComposable(
-                            keys = arrayOf(torWithState.tor.id, "selected-out-of-collection"),
-                            state = rememberMarkerState(
-                                position = LatLng(torWithState.tor.latitude, torWithState.tor.longitude)
-                            ),
-                            title = torWithState.tor.name
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .background(Color.Gray, CircleShape)
-                                    .border(2.dp, Color.White, CircleShape)
-                            )
-                        }
-                    }
-                }
-            } else {
-                // Individual markers for smaller collections (no clustering)
-                clusterItems.forEach { item ->
-                    val color = when {
-                        !item.isInActiveCollection -> Color.Gray
-                        item.isVisited -> Green
-                        item.isAccessible -> Teal
-                        else -> Orange
-                    }
-                    MarkerComposable(
-                        keys = arrayOf(item.id, item.isVisited),
-                        state = rememberMarkerState(position = item.position),
+            // T2-04: clustering removed. Every tor is rendered as a native Marker with a
+            // cached BitmapDescriptor icon (see rememberTorMarkerIcons). Sharing a handful
+            // of pre-rendered bitmaps across all ~930 markers keeps pan/zoom smooth without
+            // the Compose-per-marker cost that previously forced clustering.
+            val torIcons = rememberTorMarkerIcons()
+            mapItems.forEach { item ->
+                key(item.id) {
+                    val markerState = rememberMarkerState(key = item.id, position = item.position)
+                    Marker(
+                        state = markerState,
+                        icon = torIcons.iconFor(item),
                         title = item.title,
                         onClick = {
                             onTorSelected(item.id)
                             true
                         }
-                    ) {
-                        // Simple circle marker
-                        Box(
-                            modifier = Modifier
-                                .size(16.dp)
-                                .background(color, CircleShape)
-                                .border(1.dp, Color.White, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (item.isVisited) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(10.dp),
-                                    tint = Color.White
-                                )
-                            }
-                        }
-                    }
+                    )
                 }
+            }
 
-                // Show selected tor with grey marker if it's not in the active collection
-                selectedTor?.let { torWithState ->
-                    if (!torWithState.isInActiveCollection) {
-                        MarkerComposable(
-                            keys = arrayOf(torWithState.tor.id, "selected-out-of-collection"),
-                            state = rememberMarkerState(
-                                position = LatLng(torWithState.tor.latitude, torWithState.tor.longitude)
-                            ),
-                            title = torWithState.tor.name // No onClick - just display
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .background(Color.Gray, CircleShape)
-                                    .border(2.dp, Color.White, CircleShape)
-                            )
-                        }
+            // Show the selected tor with a larger grey marker if it's not in the active collection
+            selectedTor?.let { torWithState ->
+                if (!torWithState.isInActiveCollection) {
+                    key("selected-out-of-collection", torWithState.tor.id) {
+                        val selectedState = rememberMarkerState(
+                            key = torWithState.tor.id,
+                            position = LatLng(torWithState.tor.latitude, torWithState.tor.longitude)
+                        )
+                        Marker(
+                            state = selectedState,
+                            icon = torIcons.selectedOutOfCollection,
+                            title = torWithState.tor.name
+                        )
                     }
                 }
             }
-            } // end key(selectedCollectionId)
 
             // Compass line of sight
             if (showCompassLine && currentLocation != null && hasLocationPermission) {
