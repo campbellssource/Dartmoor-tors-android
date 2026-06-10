@@ -8,6 +8,7 @@ import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import com.dartmoortors.data.location.CompassAccuracy
 import com.dartmoortors.data.location.LocationService
 import com.dartmoortors.data.model.*
 import com.dartmoortors.data.repository.CollectionRepository
@@ -51,6 +52,8 @@ class MapViewModel @Inject constructor(
         const val DEFAULT_ZOOM = 11f
         const val DETAIL_ZOOM = 14f
         const val LOCATION_ZOOM = 15f
+        // Fixed extension factor for the bearing line (~1/3 of the trialled 1x-6x range).
+        const val COMPASS_LINE_LENGTH_FACTOR = 2.5
     }
     
     private val _selectedTorId = MutableStateFlow<String?>(null)
@@ -85,7 +88,11 @@ class MapViewModel @Inject constructor(
     // Location state from LocationService
     val currentLocation: StateFlow<Location?> = locationService.currentLocation
     val compassHeading: StateFlow<Float> = locationService.compassHeading
+    val compassAccuracy: StateFlow<CompassAccuracy> = locationService.compassAccuracy
     val isLocationEnabled: StateFlow<Boolean> = locationService.isLocationEnabled
+
+    /** Whether this device can determine a compass heading at all (T4-11). */
+    fun hasCompass(): Boolean = locationService.hasCompass()
     
     val isLoading: StateFlow<Boolean> = torRepository.isLoading
     val error: StateFlow<String?> = torRepository.error
@@ -458,12 +465,13 @@ class MapViewModel @Inject constructor(
     fun calculateCompassLineEndpoint(zoomLevel: Float): LatLng? {
         val location = currentLocation.value ?: return null
         val heading = compassHeading.value
-        
-        // Calculate line length based on zoom level
+
+        // Calculate line length based on zoom level, extended by a fixed factor that
+        // testers found gives a good reach for lining up tors (T4-11).
         // At zoom 15 (close): ~500m, zoom 11 (default): ~5km, zoom 8 (far): ~20km
         val baseDistance = 500.0 // meters at zoom 15
         val zoomFactor = Math.pow(2.0, (15 - zoomLevel).toDouble())
-        val distanceMeters = baseDistance * zoomFactor
+        val distanceMeters = baseDistance * zoomFactor * COMPASS_LINE_LENGTH_FACTOR
         
         // Convert heading to radians
         val bearingRadians = Math.toRadians(heading.toDouble())

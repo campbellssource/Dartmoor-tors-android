@@ -71,6 +71,8 @@ fun MapScreen(
     
     // Compass line of sight state
     val showCompassLine by viewModel.showCompassLine.collectAsState()
+    val compassAccuracy by viewModel.compassAccuracy.collectAsState()
+    val hasCompass = remember { viewModel.hasCompass() }
     
     // Permission state
     var hasLocationPermission by remember { mutableStateOf(viewModel.hasLocationPermission()) }
@@ -326,9 +328,40 @@ fun MapScreen(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.End
         ) {
-            if (hasLocationPermission) {
+            // Calibration hint: shown while the bearing line is active but the compass
+            // can't be trusted (T4-11). Tells the user how to fix it.
+            if (hasLocationPermission && hasCompass && showCompassLine && compassAccuracy.needsCalibration) {
+                Surface(
+                    shape = MaterialTheme.shapes.large,
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    tonalElevation = 3.dp,
+                    shadowElevation = 3.dp,
+                    modifier = Modifier.widthIn(max = 240.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Explore,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Text(
+                            text = "Compass needs calibrating — wave your phone in a figure-8.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
+            }
+
+            // Bearing line button — only when the device actually has a compass.
+            if (hasLocationPermission && hasCompass) {
                 FloatingActionButton(
                     onClick = { viewModel.toggleCompassLine() },
                     containerColor = if (showCompassLine) {
